@@ -1,0 +1,38 @@
+version: '3'
+services:
+  database:
+    image: postgres:15.2
+    command:
+      -p "${POSTGRES_PORT}"
+      -c 'pgrst.api_schema=${PGRST_DB_SCHEMA}'
+      -c 'pgrst.anon_role=${PGRST_DB_ANON_ROLE}'
+      -c 'pgrst.auth_role=${PGRST_DB_AUTH_ROLE}'
+    expose:
+      - "${POSTGRES_PORT}"
+    ports:
+      - "${DEV_POSTGRES_PORT}:${POSTGRES_PORT}"
+    # https://www.postgresql.org/docs/14/libpq-envars.html
+    environment:
+      POSTGRES_USER: "${POSTGRES_USER}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+      POSTGRES_DB: "${POSTGRES_DB}"
+      PGRST_DB_AUTH_ROLE: "${PGRST_DB_AUTH_ROLE}"
+      PGRST_DB_AUTH_PASSWORD: "${PGRST_DB_AUTH_PASSWORD}"
+      PGRST_DB_ANON_ROLE: "${PGRST_DB_ANON_ROLE}"
+    volumes:
+      - "./_generated/pgdata:/var/lib/postgresql/data"
+      # https://github.com/docker-library/docs/blob/master/postgres/README.md#initialization-scripts
+      - "./pginit:/docker-entrypoint-initdb.d"
+  api:
+    image: postgrest/postgrest
+    ports:
+      - "${DEV_PGRST_PORT}:${PGRST_SERVER_PORT}"
+    # https://postgrest.org/en/latest/configuration.html#environment-variables
+    environment:
+      PGRST_DB_URI: "postgres://${PGRST_DB_AUTH_ROLE}:${PGRST_DB_AUTH_PASSWORD}@database:${POSTGRES_PORT}/${POSTGRES_DB}"
+      PGRST_OPENAPI_SERVER_PROXY_URI: "${PGRST_OPENAPI_SERVER_PROXY_URI}"
+      PGRST_SERVER_PORT: "${PGRST_SERVER_PORT}"
+      PGRST_DB_ANON_ROLE: "${PGRST_DB_ANON_ROLE}"
+      PGRST_DB_SCHEMA: "${PGRST_DB_SCHEMA}"
+    depends_on:
+      - database
