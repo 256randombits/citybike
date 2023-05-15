@@ -1,0 +1,28 @@
+version: '3'
+services:
+  swagger:
+    image: swaggerapi/swagger-ui
+    ports:
+      - "8080:8080"
+    expose:
+      - "8080"
+    environment:
+      API_URL: "http://localhost:${PGRST_SERVER_PORT}/"
+    depends_on:
+      - api
+  # TODO: Could import the server like this:
+  # https://www.pgadmin.org/docs/pgadmin4/development/import_export_servers.html
+  # Now it has to be manually created.
+  pgadmin:
+    image: dpage/pgadmin4
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "${PGADMIN_DEFAULT_EMAIL}"
+      PGADMIN_DEFAULT_PASSWORD: "${PGADMIN_DEFAULT_PASSWORD}"
+      PGADMIN_CONFIG_SERVER_MODE: "${PGADMIN_CONFIG_SERVER_MODE}"
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "${PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED}"
+    volumes:
+      - my-data:/var/lib/pgadmin
+volumes:
+  my-data:
