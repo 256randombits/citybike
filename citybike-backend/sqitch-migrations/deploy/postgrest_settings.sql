@@ -1,31 +1,40 @@
 -- Deploy citybikes:postgrest_settings to pg
-
 BEGIN;
 
 CREATE SCHEMA utils;
 
 CREATE FUNCTION utils.get_anon_role()
-RETURNS TEXT
-AS $$
+    RETURNS TEXT
+    AS $$
 BEGIN
-  RETURN(SELECT current_setting('pgrst.anon_role'));
+    RETURN(
+        SELECT
+            CURRENT_SETTING('pgrst.anon_role'));
 END;
+$$
+LANGUAGE plpgsql;
 
-$$ LANGUAGE plpgsql;
 CREATE FUNCTION utils.get_auth_role()
-RETURNS TEXT
-AS $$
+    RETURNS TEXT
+    AS $$
 BEGIN
-  RETURN(SELECT current_setting('pgrst.auth_role'));
+    RETURN(
+        SELECT
+            CURRENT_SETTING('pgrst.auth_role'));
 END;
+$$
+LANGUAGE plpgsql;
 
-$$ LANGUAGE plpgsql;
 CREATE FUNCTION utils.get_api_schema()
-RETURNS TEXT
-AS $$
+    RETURNS TEXT
+    AS $$
 BEGIN
-  RETURN(SELECT current_setting('pgrst.api_schema'));
+    RETURN(
+        SELECT
+            CURRENT_SETTING('pgrst.api_schema'));
 END;
-$$ LANGUAGE plpgsql;
+$$
+LANGUAGE plpgsql;
 
 COMMIT;
+
