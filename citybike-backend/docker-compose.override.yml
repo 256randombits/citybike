@@ -7,7 +7,7 @@ services:
     expose:
       - "8080"
     environment:
-      API_URL: "http://localhost:${PGRST_SERVER_PORT}/"
+      API_URL: "http://localhost:${DEV_PGRST_PORT}/"
     depends_on:
       - api
   # TODO: Could import the server like this:

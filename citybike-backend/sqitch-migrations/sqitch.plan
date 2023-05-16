@@ -5,3 +5,4 @@ postgrest_settings 2023-05-15T14:59:56Z mfail <mfail@desknix> # Add helper funct
 initialize_postgrest [postgrest_settings] 2023-05-15T15:33:14Z mfail <mfail@desknix> # Create the roles required by PostgREST.
 stations 2023-05-15T17:38:44Z mfail <mfail@desknix> # Create stations table.
 journeys [stations] 2023-05-16T10:09:20Z mfail <mfail@desknix> # Add stations table.
+api_stations [stations initialize_postgrest] 2023-05-16T12:36:48Z mfail <mfail@desknix> # Create view for stations in api schema.
