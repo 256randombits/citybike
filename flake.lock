@@ -18,6 +18,42 @@
         "type": "github"
       }
     },
+    "journeys05-csv": {
+      "flake": false,
+      "locked": {
+        "narHash": "sha256-I9Dm/uhd7ACnv6NBHKLfgHxrDEA5tGiAPQ5vr0I+0EE=",
+        "type": "file",
+        "url": "https://dev.hsl.fi/citybikes/od-trips-2021/2021-05.csv"
+      },
+      "original": {
+        "type": "file",
+        "url": "https://dev.hsl.fi/citybikes/od-trips-2021/2021-05.csv"
+      }
+    },
+    "journeys06-csv": {
+      "flake": false,
+      "locked": {
+        "narHash": "sha256-IvTQd23cLZaTyPN9Nw8iooSY201FqCuEhM42Mz1wEEk=",
+        "type": "file",
+        "url": "https://dev.hsl.fi/citybikes/od-trips-2021/2021-06.csv"
+      },
+      "original": {
+        "type": "file",
+        "url": "https://dev.hsl.fi/citybikes/od-trips-2021/2021-06.csv"
+      }
+    },
+    "journeys07-csv": {
+      "flake": false,
+      "locked": {
+        "narHash": "sha256-SUd1mvJ7hwKVVFvdoQg9lBAmk1QpSjodVaUaFopsjsE=",
+        "type": "file",
+        "url": "https://dev.hsl.fi/citybikes/od-trips-2021/2021-07.csv"
+      },
+      "original": {
+        "type": "file",
+        "url": "https://dev.hsl.fi/citybikes/od-trips-2021/2021-07.csv"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1684120848,
@@ -35,7 +71,23 @@
     "root": {
       "inputs": {
         "flake-utils": "flake-utils",
-        "nixpkgs": "nixpkgs"
+        "journeys05-csv": "journeys05-csv",
+        "journeys06-csv": "journeys06-csv",
+        "journeys07-csv": "journeys07-csv",
+        "nixpkgs": "nixpkgs",
+        "stations-csv": "stations-csv"
+      }
+    },
+    "stations-csv": {
+      "flake": false,
+      "locked": {
+        "narHash": "sha256-3E/vzgmT84KtwvSpxyyF61cl8h2lFyliIjVU+7YABQU=",
+        "type": "file",
+        "url": "https://opendata.arcgis.com/datasets/726277c507ef4914b0aec3cbcfcbfafc_0.csv"
+      },
+      "original": {
+        "type": "file",
+        "url": "https://opendata.arcgis.com/datasets/726277c507ef4914b0aec3cbcfcbfafc_0.csv"
       }
     },
     "systems": {
