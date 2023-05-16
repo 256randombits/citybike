@@ -43,6 +43,10 @@
                 [
                   sqitchPg
                   postgresql_15 # Needed for psql
+
+                  elmPackages.elm
+                  elmPackages.elm-format
+                  elmPackages.elm-language-server
                 ];
             };
           };
