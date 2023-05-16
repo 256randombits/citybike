@@ -6,8 +6,6 @@ DO $$
 BEGIN
     EXECUTE FORMAT('
         DROP VIEW %I.journeys;', utils.get_api_schema());
-    EXECUTE FORMAT('
-        DROP FUNCTION %I.journeys_insert_row;', utils.get_api_schema());
 END
 $$;
 
