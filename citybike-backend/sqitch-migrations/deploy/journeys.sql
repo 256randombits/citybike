@@ -8,10 +8,9 @@ CREATE TABLE internal.journeys(
     return_time TIMESTAMP NOT NULL,
     departure_station_id INTEGER REFERENCES internal.stations(id),
     return_station_id INTEGER REFERENCES internal.stations(id),
-    distance_in_meters FLOAT NOT NULL,
-    duration_in_seconds FLOAT NOT NULL,
+    distance_in_meters INTEGER NOT NULL,
     CONSTRAINT not_less_than_ten_meters CHECK (distance_in_meters >= 10),
-    CONSTRAINT not_less_than_ten_seconds CHECK (duration_in_seconds >= 10)
+    CONSTRAINT not_less_than_ten_seconds CHECK (return_time - departure_time >= INTERVAL '10 seconds')
 );
 
 COMMIT;
