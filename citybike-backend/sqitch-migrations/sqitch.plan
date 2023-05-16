@@ -3,3 +3,4 @@
 
 postgrest_settings 2023-05-15T14:59:56Z mfail <mfail@desknix> # Add helper functions to access PostgREST settings.
 initialize_postgrest [postgrest_settings] 2023-05-15T15:33:14Z mfail <mfail@desknix> # Create the roles required by PostgREST.
+stations 2023-05-15T17:38:44Z mfail <mfail@desknix> # Create stations table.
