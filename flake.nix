@@ -45,6 +45,7 @@
                   postgresql_15 # Needed for psql
 
                   elmPackages.elm
+                  elmPackages.elm-live
                   elmPackages.elm-format
                   elmPackages.elm-language-server
                 ];
