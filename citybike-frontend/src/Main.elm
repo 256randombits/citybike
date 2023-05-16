@@ -4,6 +4,7 @@ import Browser
 import Html exposing (Html, div, p, pre, text)
 import Http
 import Json.Decode as Decode
+import Html.Attributes exposing (class)
 
 
 
@@ -88,7 +89,7 @@ type Msg
 
 view : Model -> Html Msg
 view model =
-    div []
+    div [ class "bg-green-600"]
         [ viewQueryTool model.queryMode model.stationQuery model.journeyQuery
         , viewResultsViewer model.resultsMode model.results
         ]

@@ -31,11 +31,16 @@
         in
         {
           packages = rec { };
-          apps = rec { } //
+          apps = rec { }
+            //
             (import ./citybike-backend/sqitch-migrations/sqitch.nix
-              { inherit pkgs flake-utils; }).apps //
+              { inherit pkgs flake-utils; }).apps
+            //
             (import ./citybike-backend/sqitch-migrations/data-import.nix
-              { inherit pkgs flake-utils csvFiles; }).apps;
+              { inherit pkgs flake-utils csvFiles; }).apps
+            //
+            (import ./citybike-frontend/frontend.nix
+              { inherit pkgs flake-utils; }).apps;
 
           devShells = {
             default = pkgs.mkShell {
@@ -48,6 +53,8 @@
                   elmPackages.elm-live
                   elmPackages.elm-format
                   elmPackages.elm-language-server
+
+                  nodePackages.tailwindcss
                 ];
             };
           };
