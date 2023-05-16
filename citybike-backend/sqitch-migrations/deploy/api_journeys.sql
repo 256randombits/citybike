@@ -11,7 +11,7 @@ BEGIN
         SELECT
             id,
             departure_time,
-            return_time
+            return_time,
             departure_station_id,
             return_station_id,
             distance_in_meters
