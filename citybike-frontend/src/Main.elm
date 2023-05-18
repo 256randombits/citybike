@@ -2,9 +2,9 @@ module Main exposing (main)
 
 import Browser
 import Html exposing (Html, div, p, pre, text)
+import Html.Attributes exposing (class)
 import Http
 import Json.Decode as Decode
-import Html.Attributes exposing (class)
 
 
 
@@ -89,14 +89,60 @@ type Msg
 
 view : Model -> Html Msg
 view model =
-    div [ class "bg-green-600"]
-        [ viewQueryTool model.queryMode model.stationQuery model.journeyQuery
-        , viewResultsViewer model.resultsMode model.results
+    div [ class "min-h-screen p-4 bg-gray-900 text-grey-100" ]
+        [ div [class "grid gap-4" ]
+            [ viewQueryTool model.queryMode model.stationQuery model.journeyQuery
+            , viewResultsViewer model.resultsMode model.results
+            ]
+        ]
+
+
+viewQueryTool : QueryMode -> StationQuery -> JourneyQuery -> Html Msg
+viewQueryTool queryMode stationQuery journeyQuery =
+    div [ class "bg-green-800" ]
+        [ viewQueryModeSelector queryMode
+        , viewQueryEditor queryMode stationQuery journeyQuery
+        ]
+
+
+viewQueryEditor : QueryMode -> StationQuery -> JourneyQuery -> Html msg
+viewQueryEditor queryMode stationQuery journeyQuery =
+    div []
+        [ case queryMode of
+            JourneyMode ->
+                viewJourneyQueryEditor journeyQuery
+
+            StationMode ->
+                viewStationQueryEditor stationQuery
+        ]
+
+
+viewJourneyQueryEditor : JourneyQuery -> Html msg
+viewJourneyQueryEditor journeyQuery =
+    text "Here you could edit the station query."
+
+
+viewStationQueryEditor : StationQuery -> Html msg
+viewStationQueryEditor stationQuery =
+    text "Here you could edit the station query."
+
+
+viewQueryModeSelector : QueryMode -> Html Msg
+viewQueryModeSelector queryMode =
+    div []
+        [ p []
+            [ case queryMode of
+                JourneyMode ->
+                    text "Current mode is JourenyMode"
+
+                StationMode ->
+                    text "Current mode is StationMode"
+            ]
         ]
 
 
 viewResultsViewer resultsMode results =
-    div []
+    div [ class "bg-red-900" ]
         [ viewResultsModeSelector resultsMode
         , viewResults resultsMode results
         ]
@@ -136,46 +182,3 @@ viewResultsModeSelector resultsMode =
 
         ListMode ->
             div [] [ text "Here you could see that the list mode is active." ]
-
-
-viewQueryTool : QueryMode -> StationQuery -> JourneyQuery -> Html Msg
-viewQueryTool queryMode stationQuery journeyQuery =
-    div []
-        [ viewQueryModeSelector queryMode
-        , viewQueryEditor queryMode stationQuery journeyQuery
-        ]
-
-
-viewQueryEditor : QueryMode -> StationQuery -> JourneyQuery -> Html msg
-viewQueryEditor queryMode stationQuery journeyQuery=
-    div []
-        [ case queryMode of
-            JourneyMode ->
-                viewJourneyQueryEditor journeyQuery
-
-            StationMode ->
-                viewStationQueryEditor stationQuery
-        ]
-
-
-viewJourneyQueryEditor : JourneyQuery -> Html msg
-viewJourneyQueryEditor journeyQuery =
-    text "Here you could edit the station query."
-
-viewStationQueryEditor : StationQuery -> Html msg
-viewStationQueryEditor stationQuery =
-    text "Here you could edit the station query."
-
-
-viewQueryModeSelector : QueryMode -> Html Msg
-viewQueryModeSelector queryMode =
-    div []
-        [ p []
-            [ case queryMode of
-                JourneyMode ->
-                    text "Current mode is JourenyMode"
-
-                StationMode ->
-                    text "Current mode is StationMode"
-            ]
-        ]
