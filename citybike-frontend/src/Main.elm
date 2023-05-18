@@ -5,7 +5,10 @@ import Html exposing (Html, button, div, p, pre, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import Http exposing (Error(..))
+import Station as Station exposing (..)
+import Station exposing (Station)
 import Json.Decode as Decode
+import Json.Decode exposing (list)
 
 
 
@@ -51,7 +54,7 @@ type Results
     = HasNothing
     | Loading
     | Failure Http.Error
-    | HasStations (List String)
+    | HasStations (List Station)
     | HasJourneys (List String)
 
 
@@ -81,7 +84,7 @@ initQueryTool =
 
 type Msg
     = GetStations StationQuery
-    | GotStations (Result Http.Error String)
+    | GotStations (Result Http.Error (List Station))
     | NoOp
 
 
@@ -89,12 +92,12 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         GetStations stationQuery ->
-            ( { model | results = Loading }, Http.get { url = "http://localhost:3001/stations", expect = Http.expectString GotStations } )
+            ( { model | results = Loading }, Http.get { url = "http://localhost:3001/stations", expect = Http.expectJson GotStations (list Station.decoder)} )
 
         GotStations result ->
             case result of
-                Ok text ->
-                    ( { model | results = HasStations [ text ] }, Cmd.none )
+                Ok stations ->
+                    ( { model | results = HasStations stations }, Cmd.none )
 
                 Err err ->
                     ( { model | results = Failure err }, Cmd.none )
@@ -175,19 +178,19 @@ viewResults resultsMode results =
             Failure err ->
                 case err of
                     BadUrl str ->
-                        div [] [ text "Here you could see that a failure has happened." ]
+                        div [] [ text ("BADURL" ++ str) ]
 
                     Timeout ->
-                        div [] [ text "Here you could see that a failure has happened." ]
+                        div [] [ text "TIMEOUT" ]
 
                     NetworkError ->
-                        div [] [ text "Here you could see that a failure has happened." ]
+                        div [] [ text "NETWORKERROR" ]
 
                     BadStatus int ->
-                        div [] [ text "Here you could see that a failure has happened." ]
+                        div [] [ text ("BadStatus" ++ String.fromInt int) ]
 
                     BadBody str ->
-                        div [] [ text "Here you could see that a failure has happened." ]
+                        div [] [ text ("BADBODY" ++ str)]
 
             Loading ->
                 div [] [ text "Here you could see the results loading." ]
@@ -204,7 +207,7 @@ viewResults resultsMode results =
                         div [] [ text "Here you could see stations on a map." ]
 
                     ListMode ->
-                        div [] (List.map text stationsList)
+                        div [] (stationsList |> List.map Station.getNameFi |> List.map text)
         ]
 
 
