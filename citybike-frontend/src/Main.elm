@@ -1,14 +1,12 @@
 module Main exposing (main)
 
 import Browser
-import Html exposing (Html, button, div, p, pre, text)
+import Html exposing (Html, button, div, p, pre, table, tbody, td, text, th, thead, tr)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import Http exposing (Error(..))
-import Station as Station exposing (..)
-import Station exposing (Station)
-import Json.Decode as Decode
-import Json.Decode exposing (list)
+import Json.Decode as Decode exposing (list)
+import Station exposing (..)
 
 
 
@@ -40,6 +38,15 @@ type alias Model =
     }
 
 
+type StationSortBy
+    = NameFi
+    | AddressFi
+    | CityFi
+    | Operator
+    | Capacity
+    | NoSort
+
+
 type alias StationQuery =
     { id : String
     }
@@ -54,7 +61,7 @@ type Results
     = HasNothing
     | Loading
     | Failure Http.Error
-    | HasStations (List Station)
+    | HasStations (List Station) StationSortBy
     | HasJourneys (List String)
 
 
@@ -85,6 +92,7 @@ initQueryTool =
 type Msg
     = GetStations StationQuery
     | GotStations (Result Http.Error (List Station))
+    | SetStationSortBy StationSortBy
     | NoOp
 
 
@@ -92,15 +100,25 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         GetStations stationQuery ->
-            ( { model | results = Loading }, Http.get { url = "http://localhost:3001/stations", expect = Http.expectJson GotStations (list Station.decoder)} )
+            ( { model | results = Loading }, Http.get { url = "http://localhost:3001/stations", expect = Http.expectJson GotStations (list Station.decoder) } )
 
         GotStations result ->
             case result of
                 Ok stations ->
-                    ( { model | results = HasStations stations }, Cmd.none )
+                    ( { model | results = HasStations stations NoSort }, Cmd.none )
 
                 Err err ->
                     ( { model | results = Failure err }, Cmd.none )
+        SetStationSortBy sortBy ->
+            case model.results of
+                HasStations stations _ ->
+                    ( {model | results = HasStations stations sortBy}, Cmd.none)
+                -- Maybe sorting should be put on the root level of
+                -- the model so it would be remembered and this branch would not
+                -- need to be here.
+                _ -> (model, Cmd.none)
+                
+            
 
         NoOp ->
             ( model, Cmd.none )
@@ -165,15 +183,15 @@ viewQueryModeSelector queryMode =
 
 
 viewResultsViewer resultsMode results =
-    div [ class "grow bg-red-900 overflow-scroll" ]
+    div [ class "flex flex-col grow bg-red-900 overflow-scroll" ]
         [ viewResultsModeSelector resultsMode
         , viewResults resultsMode results
         ]
 
 
-viewResults : ResultsMode -> Results -> Html msg
+viewResults : ResultsMode -> Results -> Html Msg
 viewResults resultsMode results =
-    div [ class "" ]
+    div [ class "flex grow p-4" ]
         [ case results of
             Failure err ->
                 case err of
@@ -190,7 +208,7 @@ viewResults resultsMode results =
                         div [] [ text ("BadStatus" ++ String.fromInt int) ]
 
                     BadBody str ->
-                        div [] [ text ("BADBODY" ++ str)]
+                        div [] [ text ("BADBODY" ++ str) ]
 
             Loading ->
                 div [] [ text "Here you could see the results loading." ]
@@ -201,13 +219,74 @@ viewResults resultsMode results =
             HasJourneys journeysList ->
                 div [] [ text "Here you could see journeys on a map." ]
 
-            HasStations stationsList ->
+            HasStations stationsList stationsSortBy ->
                 case resultsMode of
                     MapMode ->
                         div [] [ text "Here you could see stations on a map." ]
 
                     ListMode ->
-                        div [] (stationsList |> List.map Station.getNameFi |> List.map text)
+                        div [ class "flex grow"] [ viewStationsInAList stationsList stationsSortBy ]
+        ]
+
+
+viewStationsInAList : List Station -> StationSortBy -> Html Msg
+viewStationsInAList stationsList sortBy =
+    let
+        singleCell whenClicked x =
+            th [ class "border-separate border-seperate border-spacing-2 border border-slate-400 p-2"] [ button [ class "hover:bg-blue-800", onClick whenClicked] [x] ]
+    in
+    table [ class "bg-red-100 grow table-fixed border-seperate border-spacing-2 border border-slate-400" ]
+        [ thead []
+            [ tr []
+                [ text "Name" |> singleCell (SetStationSortBy NameFi)
+                , text "Address" |> singleCell (SetStationSortBy AddressFi)
+                , text "City" |> singleCell (SetStationSortBy CityFi)
+                , text "Operator" |> singleCell (SetStationSortBy Operator)
+                , text "Capacity" |> singleCell (SetStationSortBy Capacity)
+                ]
+            ]
+        , tbody []
+            (List.map viewStationInAList
+                (case sortBy of
+                    NoSort ->
+                        stationsList
+
+                    Capacity ->
+                        List.sortBy Station.getCapacity stationsList
+
+
+                    NameFi->
+                        List.sortBy Station.getNameFi stationsList
+
+
+                    AddressFi ->
+                        List.sortBy Station.getAddressFi stationsList
+
+
+                    CityFi ->
+                        List.sortBy Station.getCityFi stationsList
+
+                    Operator ->
+                        List.sortBy Station.getOperator stationsList
+
+
+                )
+            )
+        ]
+
+
+viewStationInAList : Station -> Html Msg
+viewStationInAList station =
+    let
+        singleCell x =
+            td [ class "border-seperate border-spacing-2 border border-slate-400 p-2" ] [ x ]
+    in
+    tr []
+        [ station |> Station.getNameFi |> text |> singleCell
+        , station |> Station.getAddressFi |> text |> singleCell
+        , station |> Station.getCityFi |> text |> singleCell
+        , station |> Station.getOperator |> text |> singleCell
+        , station |> Station.getCapacity |> String.fromInt |> text |> singleCell
         ]
 
 
