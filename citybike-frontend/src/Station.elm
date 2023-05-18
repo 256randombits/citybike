@@ -1,6 +1,5 @@
-module Station exposing (Station, createStation, decoder, getNameFi, getNameSv, getNameEn, getAddressFi, getAddressSv, getCityFi, getCitySv, getOperator, getCapacity, getX, getY)
+module Station exposing (Station, StationQuery, createStation, decoder, emptyQuery, getAddressFi, getAddressSv, getCapacity, getCityFi, getCitySv, getId, getNameEn, getNameFi, getNameSv, getOperator, getX, getY)
 
-import Json.Encode as Encode
 import Json.Decode exposing (Decoder, float, int, string)
 import Json.Decode.Pipeline exposing (required)
 
@@ -57,6 +56,7 @@ decoder =
         |> required "y" float
 
 
+
 -- encoder : Station -> Encode.Value
 -- encoder station =
 --     Encode.object
@@ -68,37 +68,97 @@ decoder =
 
 
 getId : Station -> Int
-getId (Station values) = values.id
+getId (Station values) =
+    values.id
+
 
 getNameFi : Station -> String
-getNameFi (Station values) = values.nameFi
+getNameFi (Station values) =
+    values.nameFi
+
 
 getNameSv : Station -> String
-getNameSv (Station values) = values.nameSv
+getNameSv (Station values) =
+    values.nameSv
+
 
 getNameEn : Station -> String
-getNameEn (Station values) = values.nameEn
+getNameEn (Station values) =
+    values.nameEn
+
 
 getAddressFi : Station -> String
-getAddressFi (Station values) = values.addressFi
+getAddressFi (Station values) =
+    values.addressFi
+
 
 getAddressSv : Station -> String
-getAddressSv (Station values) = values.addressSv
+getAddressSv (Station values) =
+    values.addressSv
+
 
 getCityFi : Station -> String
-getCityFi (Station values) = values.cityFi
+getCityFi (Station values) =
+    values.cityFi
+
 
 getCitySv : Station -> String
-getCitySv (Station values) = values.citySv
+getCitySv (Station values) =
+    values.citySv
+
 
 getOperator : Station -> String
-getOperator (Station values) = values.operator
+getOperator (Station values) =
+    values.operator
+
 
 getCapacity : Station -> Int
-getCapacity (Station values) = values.capacity
+getCapacity (Station values) =
+    values.capacity
+
 
 getX : Station -> Float
-getX (Station values) = values.x
+getX (Station values) =
+    values.x
+
 
 getY : Station -> Float
-getY (Station values) = values.y
+getY (Station values) =
+    values.y
+
+
+
+-- Querying
+
+
+type alias StationQuery =
+    { id : Maybe Int
+    , nameFi : Maybe String
+    , nameSv : Maybe String
+    , nameEn : Maybe String
+    , addressFi : Maybe String
+    , addressSv : Maybe String
+    , cityFi : Maybe String
+    , citySv : Maybe String
+    , operator : Maybe String
+    , capacity : Maybe Int
+    , x : Maybe Float
+    , y : Maybe Float
+    }
+
+
+emptyQuery : { id : Maybe a, nameFi : Maybe b, nameSv : Maybe c, nameEn : Maybe d, addressFi : Maybe e, addressSv : Maybe f, cityFi : Maybe g, citySv : Maybe h, operator : Maybe i, capacity : Maybe j, x : Maybe k, y : Maybe l }
+emptyQuery =
+    { id = Nothing
+    , nameFi = Nothing
+    , nameSv = Nothing
+    , nameEn = Nothing
+    , addressFi = Nothing
+    , addressSv = Nothing
+    , cityFi = Nothing
+    , citySv = Nothing
+    , operator = Nothing
+    , capacity = Nothing
+    , x = Nothing
+    , y = Nothing
+    }

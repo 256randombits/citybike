@@ -1,11 +1,12 @@
 module Main exposing (main)
 
+import Api
+import Api.Endpoint as Endpoint
 import Browser
-import Html exposing (Html, button, div, p, pre, table, tbody, td, text, th, thead, tr)
+import Html exposing (Html, button, div, p, table, tbody, td, text, th, thead, tr)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
-import Http exposing (Error(..))
-import Json.Decode as Decode exposing (list)
+import Json.Decode as Decode
 import Station exposing (..)
 
 
@@ -47,11 +48,6 @@ type StationSortBy
     | NoSort
 
 
-type alias StationQuery =
-    { id : String
-    }
-
-
 type alias JourneyQuery =
     { id : Maybe Int
     }
@@ -60,7 +56,7 @@ type alias JourneyQuery =
 type Results
     = HasNothing
     | Loading
-    | Failure Http.Error
+    | Failure Api.Error
     | HasStations (List Station) StationSortBy
     | HasJourneys (List String)
 
@@ -79,7 +75,7 @@ initQueryTool : Model
 initQueryTool =
     { queryMode = StationMode
     , resultsMode = ListMode
-    , stationQuery = { id = "" }
+    , stationQuery = emptyQuery
     , journeyQuery = { id = Nothing }
     , results = HasNothing
     }
@@ -91,7 +87,7 @@ initQueryTool =
 
 type Msg
     = GetStations StationQuery
-    | GotStations (Result Http.Error (List Station))
+    | GotStations (Result Api.Error (List Station))
     | SetStationSortBy StationSortBy
     | NoOp
 
@@ -99,8 +95,8 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        GetStations stationQuery ->
-            ( { model | results = Loading }, Http.get { url = "http://localhost:3001/stations", expect = Http.expectJson GotStations (list Station.decoder) } )
+        GetStations _->
+            ( { model | results = Loading }, Api.get (Endpoint.stations []) (Decode.list Station.decoder) GotStations )
 
         GotStations result ->
             case result of
@@ -109,16 +105,17 @@ update msg model =
 
                 Err err ->
                     ( { model | results = Failure err }, Cmd.none )
+
         SetStationSortBy sortBy ->
             case model.results of
                 HasStations stations _ ->
-                    ( {model | results = HasStations stations sortBy}, Cmd.none)
+                    ( { model | results = HasStations stations sortBy }, Cmd.none )
+
                 -- Maybe sorting should be put on the root level of
                 -- the model so it would be remembered and this branch would not
                 -- need to be here.
-                _ -> (model, Cmd.none)
-                
-            
+                _ ->
+                    ( model, Cmd.none )
 
         NoOp ->
             ( model, Cmd.none )
@@ -157,7 +154,7 @@ viewQueryEditor queryMode stationQuery journeyQuery =
 
 
 viewJourneyQueryEditor : JourneyQuery -> Html Msg
-viewJourneyQueryEditor journeyQuery =
+viewJourneyQueryEditor _=
     text "Here you could edit the journey query."
 
 
@@ -182,6 +179,7 @@ viewQueryModeSelector queryMode =
         ]
 
 
+viewResultsViewer : ResultsMode -> Results -> Html Msg
 viewResultsViewer resultsMode results =
     div [ class "flex flex-col grow bg-red-900 overflow-scroll" ]
         [ viewResultsModeSelector resultsMode
@@ -194,21 +192,7 @@ viewResults resultsMode results =
     div [ class "flex grow p-4" ]
         [ case results of
             Failure err ->
-                case err of
-                    BadUrl str ->
-                        div [] [ text ("BADURL" ++ str) ]
-
-                    Timeout ->
-                        div [] [ text "TIMEOUT" ]
-
-                    NetworkError ->
-                        div [] [ text "NETWORKERROR" ]
-
-                    BadStatus int ->
-                        div [] [ text ("BadStatus" ++ String.fromInt int) ]
-
-                    BadBody str ->
-                        div [] [ text ("BADBODY" ++ str) ]
+                div [] [ text (Api.showError err) ]
 
             Loading ->
                 div [] [ text "Here you could see the results loading." ]
@@ -216,7 +200,7 @@ viewResults resultsMode results =
             HasNothing ->
                 div [] [ text "Here you could see nothing." ]
 
-            HasJourneys journeysList ->
+            HasJourneys _ ->
                 div [] [ text "Here you could see journeys on a map." ]
 
             HasStations stationsList stationsSortBy ->
@@ -225,7 +209,7 @@ viewResults resultsMode results =
                         div [] [ text "Here you could see stations on a map." ]
 
                     ListMode ->
-                        div [ class "flex grow"] [ viewStationsInAList stationsList stationsSortBy ]
+                        div [ class "flex grow" ] [ viewStationsInAList stationsList stationsSortBy ]
         ]
 
 
@@ -233,7 +217,7 @@ viewStationsInAList : List Station -> StationSortBy -> Html Msg
 viewStationsInAList stationsList sortBy =
     let
         singleCell whenClicked x =
-            th [ class "border-separate border-seperate border-spacing-2 border border-slate-400 p-2"] [ button [ class "hover:bg-blue-800", onClick whenClicked] [x] ]
+            th [ class "border-separate border-seperate border-spacing-2 border border-slate-400 p-2" ] [ button [ class "hover:bg-blue-800", onClick whenClicked ] [ x ] ]
     in
     table [ class "bg-red-100 grow table-fixed border-seperate border-spacing-2 border border-slate-400" ]
         [ thead []
@@ -254,22 +238,17 @@ viewStationsInAList stationsList sortBy =
                     Capacity ->
                         List.sortBy Station.getCapacity stationsList
 
-
-                    NameFi->
+                    NameFi ->
                         List.sortBy Station.getNameFi stationsList
-
 
                     AddressFi ->
                         List.sortBy Station.getAddressFi stationsList
-
 
                     CityFi ->
                         List.sortBy Station.getCityFi stationsList
 
                     Operator ->
                         List.sortBy Station.getOperator stationsList
-
-
                 )
             )
         ]
