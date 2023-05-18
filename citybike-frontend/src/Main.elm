@@ -1,9 +1,10 @@
 module Main exposing (main)
 
 import Browser
-import Html exposing (Html, div, p, pre, text)
+import Html exposing (Html, button, div, p, pre, text)
 import Html.Attributes exposing (class)
-import Http
+import Html.Events exposing (onClick)
+import Http exposing (Error(..))
 import Json.Decode as Decode
 
 
@@ -16,7 +17,7 @@ main =
     Browser.application
         { init = \_ _ _ -> ( initQueryTool, Cmd.none )
         , view = \model -> { title = "Citybike", body = [ view model ] }
-        , update = \_ _ -> ( initQueryTool, Cmd.none )
+        , update = update
         , subscriptions = \_ -> Sub.none
         , onUrlRequest = \_ -> NoOp
         , onUrlChange = \_ -> NoOp
@@ -37,7 +38,7 @@ type alias Model =
 
 
 type alias StationQuery =
-    { id : Maybe Int
+    { id : String
     }
 
 
@@ -48,6 +49,8 @@ type alias JourneyQuery =
 
 type Results
     = HasNothing
+    | Loading
+    | Failure Http.Error
     | HasStations (List String)
     | HasJourneys (List String)
 
@@ -66,7 +69,7 @@ initQueryTool : Model
 initQueryTool =
     { queryMode = StationMode
     , resultsMode = ListMode
-    , stationQuery = { id = Nothing }
+    , stationQuery = { id = "" }
     , journeyQuery = { id = Nothing }
     , results = HasNothing
     }
@@ -78,9 +81,26 @@ initQueryTool =
 
 type Msg
     = GetStations StationQuery
-    | LoadingStations
-    | GotStations Decode.Value
+    | GotStations (Result Http.Error String)
     | NoOp
+
+
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    case msg of
+        GetStations stationQuery ->
+            ( { model | results = Loading }, Http.get { url = "http://localhost:3001/stations", expect = Http.expectString GotStations } )
+
+        GotStations result ->
+            case result of
+                Ok text ->
+                    ( { model | results = HasStations [ text ] }, Cmd.none )
+
+                Err err ->
+                    ( { model | results = Failure err }, Cmd.none )
+
+        NoOp ->
+            ( model, Cmd.none )
 
 
 
@@ -89,11 +109,9 @@ type Msg
 
 view : Model -> Html Msg
 view model =
-    div [ class "min-h-screen p-4 bg-gray-900 text-grey-100" ]
-        [ div [class "grid gap-4" ]
-            [ viewQueryTool model.queryMode model.stationQuery model.journeyQuery
-            , viewResultsViewer model.resultsMode model.results
-            ]
+    div [ class "flex flex-col gap-4 h-screen p-4 bg-gray-900 text-black" ]
+        [ viewQueryTool model.queryMode model.stationQuery model.journeyQuery
+        , viewResultsViewer model.resultsMode model.results
         ]
 
 
@@ -105,7 +123,7 @@ viewQueryTool queryMode stationQuery journeyQuery =
         ]
 
 
-viewQueryEditor : QueryMode -> StationQuery -> JourneyQuery -> Html msg
+viewQueryEditor : QueryMode -> StationQuery -> JourneyQuery -> Html Msg
 viewQueryEditor queryMode stationQuery journeyQuery =
     div []
         [ case queryMode of
@@ -117,14 +135,16 @@ viewQueryEditor queryMode stationQuery journeyQuery =
         ]
 
 
-viewJourneyQueryEditor : JourneyQuery -> Html msg
+viewJourneyQueryEditor : JourneyQuery -> Html Msg
 viewJourneyQueryEditor journeyQuery =
-    text "Here you could edit the station query."
+    text "Here you could edit the journey query."
 
 
-viewStationQueryEditor : StationQuery -> Html msg
+viewStationQueryEditor : StationQuery -> Html Msg
 viewStationQueryEditor stationQuery =
-    text "Here you could edit the station query."
+    div []
+        [ button [ onClick (GetStations stationQuery) ] [ text "hh" ]
+        ]
 
 
 viewQueryModeSelector : QueryMode -> Html Msg
@@ -142,7 +162,7 @@ viewQueryModeSelector queryMode =
 
 
 viewResultsViewer resultsMode results =
-    div [ class "bg-red-900" ]
+    div [ class "grow bg-red-900 overflow-scroll" ]
         [ viewResultsModeSelector resultsMode
         , viewResults resultsMode results
         ]
@@ -150,28 +170,42 @@ viewResultsViewer resultsMode results =
 
 viewResults : ResultsMode -> Results -> Html msg
 viewResults resultsMode results =
-    case resultsMode of
-        MapMode ->
-            case results of
-                HasNothing ->
-                    div [] [ text "Here you could see nothing on a map." ]
+    div [ class "" ]
+        [ case results of
+            Failure err ->
+                case err of
+                    BadUrl str ->
+                        div [] [ text "Here you could see that a failure has happened." ]
 
-                HasJourneys journeysList ->
-                    div [] [ text "Here you could see journeys on a map." ]
+                    Timeout ->
+                        div [] [ text "Here you could see that a failure has happened." ]
 
-                HasStations stationsList ->
-                    div [] [ text "Here you could see stations on a map." ]
+                    NetworkError ->
+                        div [] [ text "Here you could see that a failure has happened." ]
 
-        ListMode ->
-            case results of
-                HasNothing ->
-                    div [] [ text "Here you could see nothing in a list." ]
+                    BadStatus int ->
+                        div [] [ text "Here you could see that a failure has happened." ]
 
-                HasJourneys journeysList ->
-                    div [] [ text "Here you could see journeys in a list." ]
+                    BadBody str ->
+                        div [] [ text "Here you could see that a failure has happened." ]
 
-                HasStations stationsList ->
-                    div [] [ text "Here you could see stations in a list." ]
+            Loading ->
+                div [] [ text "Here you could see the results loading." ]
+
+            HasNothing ->
+                div [] [ text "Here you could see nothing." ]
+
+            HasJourneys journeysList ->
+                div [] [ text "Here you could see journeys on a map." ]
+
+            HasStations stationsList ->
+                case resultsMode of
+                    MapMode ->
+                        div [] [ text "Here you could see stations on a map." ]
+
+                    ListMode ->
+                        div [] (List.map text stationsList)
+        ]
 
 
 viewResultsModeSelector : ResultsMode -> Html msg
