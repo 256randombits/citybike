@@ -1,4 +1,4 @@
-module Station exposing (AddressFi(..), AddressSv(..), Capacity(..), CityFi(..), CitySv(..), Id(..), Latitude(..), Longitude(..), NameEn(..), NameFi(..), NameSv(..), Operator(..), Station, StationQuery, createStation, decoder, emptyQuery, getAddressFi, getAddressSv, getCapacity, getCityFi, getCitySv, getId, getNameEn, getNameFi, getNameSv, getOperator, getX, getY, unwrapAddressFi, unwrapCapacity, unwrapCityFi, unwrapCitySv, unwrapId, unwrapLatitude, unwrapLongitude, unwrapNameEn, unwrapNameFi, unwrapNameSv, unwrapOperator, validateAddressFi, validateAddressSv, validateCapacity, validateCityFi, validateCitySv, validateId, validateLatitude, validateLongitude, validateNameEn, validateNameFi, validateNameSv, validateOperator, unwrapAddressSv, stationQueryValidator)
+module Station exposing (AddressFi(..), AddressSv(..), Capacity(..), CityFi(..), CitySv(..), Id(..), Latitude(..), Longitude(..), NameEn(..), NameFi(..), NameSv(..), Operator(..), Station, StationQuery, createStation, decoder, emptyQuery, getAddressFi, getAddressSv, getCapacity, getCityFi, getCitySv, getId, getNameEn, getNameFi, getNameSv, getOperator, getX, getY, stationQueryValidator, unwrapAddressFi, unwrapAddressSv, unwrapCapacity, unwrapCityFi, unwrapCitySv, unwrapId, unwrapLatitude, unwrapLongitude, unwrapNameEn, unwrapNameFi, unwrapNameSv, unwrapOperator, validateAddressFi, validateAddressSv, validateCapacity, validateCityFi, validateCitySv, validateId, validateLatitude, validateLongitude, validateNameEn, validateNameFi, validateNameSv, validateOperator)
 
 import Json.Decode exposing (Decoder, float, int, string)
 import Json.Decode.Pipeline exposing (required)
@@ -128,13 +128,6 @@ getY (Station values) =
     values.y
 
 
-
--- Querying
--- Allow typing wrong types into query. It is akward
--- not to be allowed to type anything into a field.
--- Show error messages instead.
-
-
 type alias StationQuery =
     { maybeId : Maybe Id
     , maybeNameFi : Maybe NameFi
@@ -148,6 +141,8 @@ type alias StationQuery =
     , maybeCapacity : Maybe Capacity
     , maybeLongitude : Maybe Longitude
     , maybeLatitude : Maybe Latitude
+    , offset : Int
+    , limit : Int
     }
 
 
@@ -165,6 +160,8 @@ emptyQuery =
     , maybeCapacity = Nothing
     , maybeLongitude = Nothing
     , maybeLatitude = Nothing
+    , offset = 0
+    , limit = 15
     }
 
 

@@ -12,6 +12,7 @@ get url decoder whenReady =
         { method = "GET"
         , url = url
         , expect = Http.expectJson whenReady decoder
+        -- , headers = [ Http.header "Range-Unit" "items", Http.header "Range" "10-19"]
         , headers = []
         , body = Http.emptyBody
         , timeout = Nothing

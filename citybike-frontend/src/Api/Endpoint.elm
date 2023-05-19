@@ -1,13 +1,9 @@
 module Api.Endpoint exposing (Endpoint, request, stations)
 
 import Http
-import Station exposing (StationQuery, unwrapId, unwrapNameFi)
+import Station exposing (StationQuery, unwrapAddressFi, unwrapCapacity, unwrapCityFi, unwrapId, unwrapNameFi, unwrapOperator)
 import Url.Builder as Builder exposing (QueryParameter, string)
 import Validate exposing (Valid, fromValid)
-import Station exposing (unwrapAddressFi)
-import Station exposing (unwrapCityFi)
-import Station exposing (unwrapOperator)
-import Station exposing (unwrapCapacity)
 
 
 request :
@@ -71,7 +67,7 @@ stations stationQuery =
                             [ Builder.string key ("eq." ++ unwrap wrappedString) ]
             in
             List.foldl (++)
-                []
+                [ Builder.string "limit" (String.fromInt stationQuery.limit), Builder.string "offset" (String.fromInt stationQuery.offset)]
                 [ fieldToQueryParams "id" stationQuery.maybeId unwrapId
                 , fieldToQueryParams "name_fi" stationQuery.maybeNameFi unwrapNameFi
                 , fieldToQueryParams "address_fi" stationQuery.maybeAddressFi unwrapAddressFi

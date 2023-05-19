@@ -56,9 +56,9 @@ type alias JourneyQuery =
 
 type Results
     = HasNothing
-    | Loading
+    | LoadingStations StationQuery
     | Failure Api.Error
-    | HasStations (List Station) StationSortBy
+    | HasStations (List Station) StationSortBy StationQuery
     | HasJourneys (List String)
 
 
@@ -88,7 +88,9 @@ initQueryTool =
 
 type Msg
     = GetStations StationQuery
+    | LoadMoreStations
     | GotStations (Result Api.Error (List Station))
+    | GotMoreStations (Result Api.Error (List Station))
     | SetStationSortBy StationSortBy
     | UpdateStationQuery StationQuery
     | NoOp
@@ -97,21 +99,56 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        GetStations _ ->
-            ( { model | results = Loading }, Api.get (Endpoint.stations model.stationQuery) (Decode.list Station.decoder) GotStations )
+        GetStations executedQuery ->
+            ( { model | results = LoadingStations executedQuery }, Api.get (Endpoint.stations model.stationQuery) (Decode.list Station.decoder) GotStations )
+
+        LoadMoreStations ->
+            case model.results of
+                HasStations stations sortBy executedQuery ->
+                    let
+                        newQuery =
+                            { executedQuery | offset = executedQuery.limit + executedQuery.offset }
+                    in
+                    ( { model | results = HasStations stations sortBy newQuery }
+                    , Api.get (Endpoint.stations newQuery) (Decode.list Station.decoder) GotMoreStations
+                    )
+
+                -- TODO: Figure out if the model should be changed.
+                _ ->
+                    ( model, Cmd.none )
 
         GotStations result ->
-            case result of
-                Ok stations ->
-                    ( { model | results = HasStations stations NoSortAsc }, Cmd.none )
+            case model.results of
+                LoadingStations executedQuery ->
+                    case result of
+                        Ok stations ->
+                            ( { model | results = HasStations stations NoSortAsc executedQuery }, Cmd.none )
 
-                Err err ->
-                    ( { model | results = Failure err }, Cmd.none )
+                        Err err ->
+                            ( { model | results = Failure err }, Cmd.none )
+
+                -- User changed something before the results came.
+                _ ->
+                    ( model, Cmd.none )
+
+        GotMoreStations result ->
+            case model.results of
+                HasStations oldStations sortBy executedQuery ->
+                    case result of
+                        Ok newStations ->
+                            ( { model | results = HasStations (oldStations ++ newStations) sortBy executedQuery }, Cmd.none )
+
+                        Err err ->
+                            ( { model | results = Failure err }, Cmd.none )
+
+                -- User changed something before the results came.
+                _ ->
+                    ( model, Cmd.none )
 
         SetStationSortBy sortBy ->
             case model.results of
-                HasStations stations _ ->
-                    ( { model | results = HasStations stations sortBy }, Cmd.none )
+                HasStations stations _ executedQuery ->
+                    ( { model | results = HasStations stations sortBy executedQuery }, Cmd.none )
 
                 -- Maybe sorting should be put on the root level of
                 -- the model so it would be remembered and this branch would not
@@ -276,7 +313,7 @@ viewResults resultsMode results =
             Failure err ->
                 div [] [ text (Api.showError err) ]
 
-            Loading ->
+            LoadingStations _ ->
                 div [] [ text "Here you could see the results loading." ]
 
             HasNothing ->
@@ -285,13 +322,16 @@ viewResults resultsMode results =
             HasJourneys _ ->
                 div [] [ text "Here you could see journeys on a map." ]
 
-            HasStations stationsList stationsSortBy ->
+            HasStations stationsList stationsSortBy executedQuery ->
                 case resultsMode of
                     MapMode ->
                         div [] [ text "Here you could see stations on a map." ]
 
                     ListMode ->
-                        div [ class "flex grow" ] [ viewStationsInAList stationsList stationsSortBy ]
+                        div [ class "flex flex-col grow" ]
+                            [ viewStationsInAList stationsList stationsSortBy
+                            , button [ onClick LoadMoreStations ] [ text "Load More" ]
+                            ]
         ]
 
 
