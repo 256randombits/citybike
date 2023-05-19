@@ -3,11 +3,12 @@ module Main exposing (main)
 import Api
 import Api.Endpoint as Endpoint
 import Browser
-import Html exposing (Html, button, div, p, table, tbody, td, text, th, thead, tr)
-import Html.Attributes exposing (class)
-import Html.Events exposing (onClick)
+import Html exposing (Html, button, div, input, p, table, tbody, td, text, th, thead, tr)
+import Html.Attributes exposing (class, placeholder, type_, value)
+import Html.Events exposing (onClick, onInput)
 import Json.Decode as Decode
 import Station exposing (..)
+import Validate exposing (validate)
 
 
 
@@ -40,12 +41,12 @@ type alias Model =
 
 
 type StationSortBy
-    = NameFi
-    | AddressFi
-    | CityFi
-    | Operator
-    | Capacity
-    | NoSort
+    = NameFiAsc
+    | AddressFiAsc
+    | CityFiAsc
+    | OperatorAsc
+    | CapacityAsc
+    | NoSortAsc
 
 
 type alias JourneyQuery =
@@ -89,19 +90,20 @@ type Msg
     = GetStations StationQuery
     | GotStations (Result Api.Error (List Station))
     | SetStationSortBy StationSortBy
+    | UpdateStationQuery StationQuery
     | NoOp
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        GetStations _->
+        GetStations _ ->
             ( { model | results = Loading }, Api.get (Endpoint.stations []) (Decode.list Station.decoder) GotStations )
 
         GotStations result ->
             case result of
                 Ok stations ->
-                    ( { model | results = HasStations stations NoSort }, Cmd.none )
+                    ( { model | results = HasStations stations NoSortAsc }, Cmd.none )
 
                 Err err ->
                     ( { model | results = Failure err }, Cmd.none )
@@ -116,6 +118,9 @@ update msg model =
                 -- need to be here.
                 _ ->
                     ( model, Cmd.none )
+
+        UpdateStationQuery newQuery ->
+            ( { model | stationQuery = newQuery }, Cmd.none )
 
         NoOp ->
             ( model, Cmd.none )
@@ -154,14 +159,91 @@ viewQueryEditor queryMode stationQuery journeyQuery =
 
 
 viewJourneyQueryEditor : JourneyQuery -> Html Msg
-viewJourneyQueryEditor _=
-    text "Here you could edit the journey query."
+viewJourneyQueryEditor _ =
+    div []
+        [ input [ type_ "text", placeholder "placeholder", value "", onInput (\_ -> NoOp) ] []
+        ]
 
 
 viewStationQueryEditor : StationQuery -> Html Msg
 viewStationQueryEditor stationQuery =
-    div []
-        [ button [ onClick (GetStations stationQuery) ] [ text "hh" ]
+    let
+        viewField : String -> Maybe a -> (a -> String) -> (String -> msg) -> Validate.Validator String a -> Html msg
+        viewField ph val unwrap toMsg validator =
+            let
+                viewErrors =
+                    case val of
+                        Nothing ->
+                            []
+
+                        Just nonEmptyVal ->
+                            case validate validator nonEmptyVal of
+                                Ok _ ->
+                                    []
+
+                                Err errors ->
+                                    List.map text errors
+
+                viewInput =
+                    input
+                        [ type_ "text"
+                        , placeholder ph
+                        , value (Maybe.withDefault "" <| Maybe.map unwrap val)
+                        , onInput toMsg
+                        ]
+                        []
+            in
+            div []
+                [ viewInput
+                , p [class "text-red-900"] viewErrors
+                ]
+
+        emptyStringToNothing : (String -> a) -> String -> Maybe a
+        emptyStringToNothing constructor str =
+            if str == "" then
+                Nothing
+
+            else
+                Just (constructor str)
+    in
+    div [ class "grid grid-cols-3 m-4" ]
+        [ button [ onClick (GetStations stationQuery), class "col-span-3" ] [ text "hh" ]
+        , viewField
+            "id"
+            stationQuery.id
+            unwrapId
+            (\newId -> UpdateStationQuery { stationQuery | id = emptyStringToNothing Id newId })
+            validateId
+        , viewField
+            "name_fi"
+            stationQuery.nameFi
+            unwrapNameFi
+            (\newNameFi -> UpdateStationQuery { stationQuery | nameFi = emptyStringToNothing NameFi newNameFi })
+            validateNameFi
+        , viewField
+            "address_fi"
+            stationQuery.addressFi
+            unwrapAddressFi
+            (\newAddressFi -> UpdateStationQuery { stationQuery | addressFi = emptyStringToNothing AddressFi newAddressFi })
+            validateAddressFi
+        , viewField
+            "city_fi"
+            stationQuery.cityFi
+            unwrapCityFi
+            (\newCityFi -> UpdateStationQuery { stationQuery | cityFi = emptyStringToNothing CityFi newCityFi })
+            validateCityFi
+        , viewField
+            "operator"
+            stationQuery.operator
+            unwrapOperator
+            (\newOperator -> UpdateStationQuery { stationQuery | operator = emptyStringToNothing Operator newOperator })
+            validateOperator
+        , viewField
+            "capacity"
+            stationQuery.capacity
+            unwrapCapacity
+            (\newCapacity -> UpdateStationQuery { stationQuery | capacity = emptyStringToNothing Capacity newCapacity })
+            validateCapacity
         ]
 
 
@@ -222,32 +304,32 @@ viewStationsInAList stationsList sortBy =
     table [ class "bg-red-100 grow table-fixed border-seperate border-spacing-2 border border-slate-400" ]
         [ thead []
             [ tr []
-                [ text "Name" |> singleCell (SetStationSortBy NameFi)
-                , text "Address" |> singleCell (SetStationSortBy AddressFi)
-                , text "City" |> singleCell (SetStationSortBy CityFi)
-                , text "Operator" |> singleCell (SetStationSortBy Operator)
-                , text "Capacity" |> singleCell (SetStationSortBy Capacity)
+                [ text "Name" |> singleCell (SetStationSortBy NameFiAsc)
+                , text "Address" |> singleCell (SetStationSortBy AddressFiAsc)
+                , text "City" |> singleCell (SetStationSortBy CityFiAsc)
+                , text "Operator" |> singleCell (SetStationSortBy OperatorAsc)
+                , text "Capacity" |> singleCell (SetStationSortBy CapacityAsc)
                 ]
             ]
         , tbody []
             (List.map viewStationInAList
                 (case sortBy of
-                    NoSort ->
+                    NoSortAsc ->
                         stationsList
 
-                    Capacity ->
+                    CapacityAsc ->
                         List.sortBy Station.getCapacity stationsList
 
-                    NameFi ->
+                    NameFiAsc ->
                         List.sortBy Station.getNameFi stationsList
 
-                    AddressFi ->
+                    AddressFiAsc ->
                         List.sortBy Station.getAddressFi stationsList
 
-                    CityFi ->
+                    CityFiAsc ->
                         List.sortBy Station.getCityFi stationsList
 
-                    Operator ->
+                    OperatorAsc ->
                         List.sortBy Station.getOperator stationsList
                 )
             )
