@@ -98,7 +98,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         GetStations _ ->
-            ( { model | results = Loading }, Api.get (Endpoint.stations []) (Decode.list Station.decoder) GotStations )
+            ( { model | results = Loading }, Api.get (Endpoint.stations model.stationQuery) (Decode.list Station.decoder) GotStations )
 
         GotStations result ->
             case result of
@@ -195,7 +195,7 @@ viewStationQueryEditor stationQuery =
             in
             div []
                 [ viewInput
-                , p [class "text-red-900"] viewErrors
+                , p [ class "text-red-900" ] viewErrors
                 ]
 
         emptyStringToNothing : (String -> a) -> String -> Maybe a
@@ -210,39 +210,39 @@ viewStationQueryEditor stationQuery =
         [ button [ onClick (GetStations stationQuery), class "col-span-3" ] [ text "hh" ]
         , viewField
             "id"
-            stationQuery.id
+            stationQuery.maybeId
             unwrapId
-            (\newId -> UpdateStationQuery { stationQuery | id = emptyStringToNothing Id newId })
+            (\newId -> UpdateStationQuery { stationQuery | maybeId = emptyStringToNothing Id newId })
             validateId
         , viewField
             "name_fi"
-            stationQuery.nameFi
+            stationQuery.maybeNameFi
             unwrapNameFi
-            (\newNameFi -> UpdateStationQuery { stationQuery | nameFi = emptyStringToNothing NameFi newNameFi })
+            (\newNameFi -> UpdateStationQuery { stationQuery | maybeNameFi = emptyStringToNothing NameFi newNameFi })
             validateNameFi
         , viewField
             "address_fi"
-            stationQuery.addressFi
+            stationQuery.maybeAddressFi
             unwrapAddressFi
-            (\newAddressFi -> UpdateStationQuery { stationQuery | addressFi = emptyStringToNothing AddressFi newAddressFi })
+            (\newAddressFi -> UpdateStationQuery { stationQuery | maybeAddressFi = emptyStringToNothing AddressFi newAddressFi })
             validateAddressFi
         , viewField
             "city_fi"
-            stationQuery.cityFi
+            stationQuery.maybeCityFi
             unwrapCityFi
-            (\newCityFi -> UpdateStationQuery { stationQuery | cityFi = emptyStringToNothing CityFi newCityFi })
+            (\newCityFi -> UpdateStationQuery { stationQuery | maybeCityFi = emptyStringToNothing CityFi newCityFi })
             validateCityFi
         , viewField
             "operator"
-            stationQuery.operator
+            stationQuery.maybeOperator
             unwrapOperator
-            (\newOperator -> UpdateStationQuery { stationQuery | operator = emptyStringToNothing Operator newOperator })
+            (\newOperator -> UpdateStationQuery { stationQuery | maybeOperator = emptyStringToNothing Operator newOperator })
             validateOperator
         , viewField
             "capacity"
-            stationQuery.capacity
+            stationQuery.maybeCapacity
             unwrapCapacity
-            (\newCapacity -> UpdateStationQuery { stationQuery | capacity = emptyStringToNothing Capacity newCapacity })
+            (\newCapacity -> UpdateStationQuery { stationQuery | maybeCapacity = emptyStringToNothing Capacity newCapacity })
             validateCapacity
         ]
 
@@ -271,7 +271,7 @@ viewResultsViewer resultsMode results =
 
 viewResults : ResultsMode -> Results -> Html Msg
 viewResults resultsMode results =
-    div [ class "flex grow p-4" ]
+    div [ class "flex grow p-4 m-4" ]
         [ case results of
             Failure err ->
                 div [] [ text (Api.showError err) ]

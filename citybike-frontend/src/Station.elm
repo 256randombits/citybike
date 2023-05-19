@@ -136,35 +136,35 @@ getY (Station values) =
 
 
 type alias StationQuery =
-    { id : Maybe Id
-    , nameFi : Maybe NameFi
-    , nameSv : Maybe NameSv
-    , nameEn : Maybe NameEn
-    , addressFi : Maybe AddressFi
-    , addressSv : Maybe AddressSv
-    , cityFi : Maybe CityFi
-    , citySv : Maybe CitySv
-    , operator : Maybe Operator
-    , capacity : Maybe Capacity
-    , x : Maybe Longitude
-    , y : Maybe Latitude
+    { maybeId : Maybe Id
+    , maybeNameFi : Maybe NameFi
+    , maybeNameSv : Maybe NameSv
+    , maybeNameEn : Maybe NameEn
+    , maybeAddressFi : Maybe AddressFi
+    , maybeAddressSv : Maybe AddressSv
+    , maybeCityFi : Maybe CityFi
+    , maybeCitySv : Maybe CitySv
+    , maybeOperator : Maybe Operator
+    , maybeCapacity : Maybe Capacity
+    , maybeLongitude : Maybe Longitude
+    , maybeLatitude : Maybe Latitude
     }
 
 
-emptyQuery : { id : Maybe a, nameFi : Maybe b, nameSv : Maybe c, nameEn : Maybe d, addressFi : Maybe e, addressSv : Maybe f, cityFi : Maybe g, citySv : Maybe h, operator : Maybe i, capacity : Maybe j, x : Maybe k, y : Maybe l }
+emptyQuery : StationQuery
 emptyQuery =
-    { id = Nothing
-    , nameFi = Nothing
-    , nameSv = Nothing
-    , nameEn = Nothing
-    , addressFi = Nothing
-    , addressSv = Nothing
-    , cityFi = Nothing
-    , citySv = Nothing
-    , operator = Nothing
-    , capacity = Nothing
-    , x = Nothing
-    , y = Nothing
+    { maybeId = Nothing
+    , maybeNameFi = Nothing
+    , maybeNameSv = Nothing
+    , maybeNameEn = Nothing
+    , maybeAddressFi = Nothing
+    , maybeAddressSv = Nothing
+    , maybeCityFi = Nothing
+    , maybeCitySv = Nothing
+    , maybeOperator = Nothing
+    , maybeCapacity = Nothing
+    , maybeLongitude = Nothing
+    , maybeLatitude = Nothing
     }
 
 
@@ -185,18 +185,18 @@ stationQueryToErrors stationQuery =
                         Err errorsList ->
                             errorsList
     in
-    fieldErrors .id validateId
-        ++ fieldErrors .nameFi validateNameFi
-        ++ fieldErrors .nameSv validateNameSv
-        ++ fieldErrors .nameEn validateNameEn
-        ++ fieldErrors .addressFi validateAddressFi
-        ++ fieldErrors .addressSv validateAddressSv
-        ++ fieldErrors .cityFi validateCityFi
-        ++ fieldErrors .citySv validateCitySv
-        ++ fieldErrors .operator validateOperator
-        ++ fieldErrors .capacity validateCapacity
-        ++ fieldErrors .x validateLongitude
-        ++ fieldErrors .y validateLatitude
+    fieldErrors .maybeId validateId
+        ++ fieldErrors .maybeNameFi validateNameFi
+        ++ fieldErrors .maybeNameSv validateNameSv
+        ++ fieldErrors .maybeNameEn validateNameEn
+        ++ fieldErrors .maybeAddressFi validateAddressFi
+        ++ fieldErrors .maybeAddressSv validateAddressSv
+        ++ fieldErrors .maybeCityFi validateCityFi
+        ++ fieldErrors .maybeCitySv validateCitySv
+        ++ fieldErrors .maybeOperator validateOperator
+        ++ fieldErrors .maybeCapacity validateCapacity
+        ++ fieldErrors .maybeLongitude validateLongitude
+        ++ fieldErrors .maybeLatitude validateLatitude
 
 
 stationQueryValidator : Validator String StationQuery

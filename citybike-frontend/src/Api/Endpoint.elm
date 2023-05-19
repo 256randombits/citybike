@@ -1,7 +1,13 @@
 module Api.Endpoint exposing (Endpoint, request, stations)
 
 import Http
-import Url.Builder exposing (QueryParameter)
+import Station exposing (StationQuery, unwrapId, unwrapNameFi)
+import Url.Builder as Builder exposing (QueryParameter, string)
+import Validate exposing (Valid, fromValid)
+import Station exposing (unwrapAddressFi)
+import Station exposing (unwrapCityFi)
+import Station exposing (unwrapOperator)
+import Station exposing (unwrapCapacity)
 
 
 request :
@@ -40,7 +46,7 @@ type Endpoint
 
 url : List String -> List QueryParameter -> Endpoint
 url paths queryParams =
-    Url.Builder.crossOrigin "http://localhost:3001"
+    Builder.crossOrigin "http://localhost:3001"
         paths
         queryParams
         |> Endpoint
@@ -50,6 +56,37 @@ url paths queryParams =
 -- ENDPOINTS
 
 
-stations : List QueryParameter -> Endpoint
-stations params =
+stations : StationQuery -> Endpoint
+stations stationQuery =
+    let
+        queryParams =
+            let
+                fieldToQueryParams : String -> Maybe a -> (a -> String) -> List QueryParameter
+                fieldToQueryParams key maybeWrappedString unwrap =
+                    case maybeWrappedString of
+                        Nothing ->
+                            []
+
+                        Just wrappedString ->
+                            [ Builder.string key ("eq." ++ unwrap wrappedString) ]
+            in
+            List.foldl (++)
+                []
+                [ fieldToQueryParams "id" stationQuery.maybeId unwrapId
+                , fieldToQueryParams "name_fi" stationQuery.maybeNameFi unwrapNameFi
+                , fieldToQueryParams "address_fi" stationQuery.maybeAddressFi unwrapAddressFi
+                , fieldToQueryParams "city_fi" stationQuery.maybeCityFi unwrapCityFi
+                , fieldToQueryParams "operator" stationQuery.maybeOperator unwrapOperator
+                , fieldToQueryParams "capacity" stationQuery.maybeCapacity unwrapCapacity
+                ]
+    in
+    internalStations queryParams
+
+
+
+-- INTERNAL
+
+
+internalStations : List QueryParameter -> Endpoint
+internalStations params =
     url [ "stations" ] params
