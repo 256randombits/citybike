@@ -46,7 +46,7 @@ RETURNING
 );
     -- A function that takes duration and distance and returns a boolean telling whether or not
     -- it is possible to insert a journey with the given distance or duration.
-    CREATE OR REPLACE FUNCTION pg_temp.test_journey(departure TIMESTAMP, RETURN TIMESTAMP, distance INTEGER, station_id INTEGER )
+    CREATE OR REPLACE FUNCTION pg_temp.test_journey(departure TIMESTAMPTZ, RETURN TIMESTAMPTZ, distance INTEGER, station_id INTEGER )
         RETURNS hit_status AS $function$
 DECLARE
     constraint_name TEXT;
