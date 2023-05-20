@@ -6,12 +6,10 @@ import Browser
 import Html exposing (Html, button, div, input, p, table, tbody, td, text, th, thead, tr)
 import Html.Attributes exposing (class, placeholder, type_, value)
 import Html.Events exposing (onClick, onInput)
-import Json.Decode as Decode
+import Journey exposing (Journey, JourneyQuery)
+import Json.Decode as Decode exposing (string)
 import Station exposing (..)
 import Validate exposing (validate)
-import Journey exposing (JourneyQuery)
-import Json.Decode exposing (string)
-import Journey exposing (Journey)
 
 
 
@@ -50,7 +48,6 @@ type StationSortBy
     | OperatorAsc
     | CapacityAsc
     | NoSortAsc
-
 
 
 type Results
@@ -175,12 +172,13 @@ update msg model =
 
         -- Journey
         GetJourneys executedQuery ->
-            ( { model | results = LoadingJourneys executedQuery }, Api.get (Endpoint.journeys executedQuery) (Decode.list Journey.decoder) GotJourneys)
+            ( { model | results = LoadingJourneys executedQuery }, Api.get (Endpoint.journeys executedQuery) (Decode.list Journey.decoder) GotJourneys )
+
         GotJourneys result ->
             case model.results of
                 LoadingJourneys executedQuery ->
                     case result of
-                        Ok journeys->
+                        Ok journeys ->
                             ( { model | results = HasJourneys journeys }, Cmd.none )
 
                         Err err ->
@@ -353,12 +351,20 @@ viewResults resultsMode results =
             HasNothing ->
                 div [] [ text "Here you could see nothing." ]
 
-            HasJourneys _ ->
-                div [] [ text "Here you could see journeys on a map." ]
+            HasJourneys journeysList ->
+                case resultsMode of
+                    MapMode ->
+                        div [] [ text "Here you could see journeys on a map." ]
+
+                    ListMode ->
+                        div [ class "flex flex-col grow" ]
+                            [ viewJourneysInAList journeysList OperatorAsc
+                            , button [ onClick LoadMoreStations ] [ text "Load More" ]
+                            ]
 
             LoadingJourneys _ ->
                 div [] [ text "Here you could see the results loading." ]
- 
+
             HasStations stationsList stationsSortBy executedQuery ->
                 case resultsMode of
                     MapMode ->
@@ -372,11 +378,46 @@ viewResults resultsMode results =
         ]
 
 
+viewJourneysInAList : List Journey -> StationSortBy -> Html Msg
+viewJourneysInAList journeysList sortBy =
+    let
+        singleCell whenClicked x =
+            th [ class "border-separate border-seperate border-spacing-2 border border-slate-400 p-2" ] [ button [ class "hover:bg-blue-800", onClick whenClicked ] [ x ] ]
+    in
+    table [ class "bg-red-100 grow table-fixed border-seperate border-spacing-2 border border-slate-400" ]
+        [ thead []
+            [ tr []
+                [ text "Departure Station" |> singleCell (SetStationSortBy NameFiAsc)
+                , text "Return Station" |> singleCell (SetStationSortBy AddressFiAsc)
+                , text "Covered distance(km)" |> singleCell (SetStationSortBy CityFiAsc)
+                , text "Duration(min)" |> singleCell (SetStationSortBy OperatorAsc)
+                ]
+            ]
+        , tbody []
+            (List.map viewJourneyInAList journeysList)
+        ]
+
+
+viewJourneyInAList : Journey -> Html Msg
+viewJourneyInAList journey =
+    let
+        singleCell x =
+            td [ class "border-seperate border-spacing-2 border border-slate-400 p-2" ] [ x ]
+    in
+    tr []
+        [ journey |> Journey.getDepartureStation |> Station.getNameFi |> text |> singleCell
+        , journey |> Journey.getReturnStation |> Station.getNameFi |> text |> singleCell
+        , journey |> Journey.getDistanceInMeters |> toFloat |> (\x -> x / 1000) |> String.fromFloat |> text |> singleCell
+        , "TODO" |> text |> singleCell
+        ]
+
+
 viewStationsInAList : List Station -> StationSortBy -> Html Msg
 viewStationsInAList stationsList sortBy =
     let
         singleCell whenClicked x =
-            th [ class "border-separate border-seperate border-spacing-2 border border-slate-400 p-2" ] [ button [ class "hover:bg-blue-800", onClick whenClicked ] [ x ] ]
+            th [ class "border-separate border-seperate border-spacing-2 border border-slate-400 p-2" ]
+                [ button [ class "hover:bg-blue-800", onClick whenClicked ] [ x ] ]
     in
     table [ class "bg-red-100 grow table-fixed border-seperate border-spacing-2 border border-slate-400" ]
         [ thead []

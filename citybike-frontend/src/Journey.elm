@@ -7,7 +7,7 @@ module Journey exposing
     , getDepartureStation
     , getDepartureTime
     , getDistanceInMeters
-    , getReturnStationId
+    , getReturnStation
     , getReturnTime
     )
 
@@ -83,8 +83,8 @@ getDepartureStation (Journey values) =
     values.departureStation
 
 
-getReturnStationId : Journey -> Station
-getReturnStationId (Journey values) =
+getReturnStation : Journey -> Station
+getReturnStation (Journey values) =
     values.returnStation
 
 
