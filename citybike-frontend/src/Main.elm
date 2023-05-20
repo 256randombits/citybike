@@ -9,6 +9,9 @@ import Html.Events exposing (onClick, onInput)
 import Json.Decode as Decode
 import Station exposing (..)
 import Validate exposing (validate)
+import Journey exposing (JourneyQuery)
+import Json.Decode exposing (string)
+import Journey exposing (Journey)
 
 
 
@@ -49,17 +52,14 @@ type StationSortBy
     | NoSortAsc
 
 
-type alias JourneyQuery =
-    { id : Maybe Int
-    }
-
 
 type Results
     = HasNothing
     | LoadingStations StationQuery
+    | LoadingJourneys JourneyQuery
     | Failure Api.Error
     | HasStations (List Station) StationSortBy StationQuery
-    | HasJourneys (List String)
+    | HasJourneys (List Journey)
 
 
 type ResultsMode
@@ -86,13 +86,21 @@ initQueryTool =
 -- UPDATE
 
 
-type Msg
+type
+    Msg
+    -- Station
     = GetStations StationQuery
     | LoadMoreStations
     | GotStations (Result Api.Error (List Station))
     | GotMoreStations (Result Api.Error (List Station))
     | SetStationSortBy StationSortBy
     | UpdateStationQuery StationQuery
+      -- Journey
+    | GetJourneys JourneyQuery
+    | GotJourneys (Result Api.Error (List Journey))
+      --QueryTool
+    | SetQueryToolToStationMode
+    | SetQueryToolToJourneyMode
     | NoOp
 
 
@@ -159,6 +167,29 @@ update msg model =
         UpdateStationQuery newQuery ->
             ( { model | stationQuery = newQuery }, Cmd.none )
 
+        SetQueryToolToStationMode ->
+            ( { model | queryMode = StationMode }, Cmd.none )
+
+        SetQueryToolToJourneyMode ->
+            ( { model | queryMode = JourneyMode }, Cmd.none )
+
+        -- Journey
+        GetJourneys executedQuery ->
+            ( { model | results = LoadingJourneys executedQuery }, Api.get (Endpoint.journeys executedQuery) (Decode.list Journey.decoder) GotJourneys)
+        GotJourneys result ->
+            case model.results of
+                LoadingJourneys executedQuery ->
+                    case result of
+                        Ok journeys->
+                            ( { model | results = HasJourneys journeys }, Cmd.none )
+
+                        Err err ->
+                            ( { model | results = Failure err }, Cmd.none )
+
+                -- User changed something before the results came.
+                _ ->
+                    ( model, Cmd.none )
+
         NoOp ->
             ( model, Cmd.none )
 
@@ -196,9 +227,10 @@ viewQueryEditor queryMode stationQuery journeyQuery =
 
 
 viewJourneyQueryEditor : JourneyQuery -> Html Msg
-viewJourneyQueryEditor _ =
+viewJourneyQueryEditor journeyQuery =
     div []
         [ input [ type_ "text", placeholder "placeholder", value "", onInput (\_ -> NoOp) ] []
+        , button [ onClick (GetJourneys journeyQuery), class "col-span-3" ] [ text "hh" ]
         ]
 
 
@@ -294,6 +326,8 @@ viewQueryModeSelector queryMode =
 
                 StationMode ->
                     text "Current mode is StationMode"
+            , button [ onClick SetQueryToolToJourneyMode, class "col-span-3" ] [ text "SET TO JourneyMode" ]
+            , button [ onClick SetQueryToolToStationMode, class "col-span-3" ] [ text "SET TO StationMode" ]
             ]
         ]
 
@@ -322,6 +356,9 @@ viewResults resultsMode results =
             HasJourneys _ ->
                 div [] [ text "Here you could see journeys on a map." ]
 
+            LoadingJourneys _ ->
+                div [] [ text "Here you could see the results loading." ]
+ 
             HasStations stationsList stationsSortBy executedQuery ->
                 case resultsMode of
                     MapMode ->

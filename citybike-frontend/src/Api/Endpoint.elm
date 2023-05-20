@@ -1,9 +1,10 @@
-module Api.Endpoint exposing (Endpoint, request, stations)
+module Api.Endpoint exposing (Endpoint, request, stations, journeys)
 
 import Http
 import Station exposing (StationQuery, unwrapAddressFi, unwrapCapacity, unwrapCityFi, unwrapId, unwrapNameFi, unwrapOperator)
 import Url.Builder as Builder exposing (QueryParameter, string)
 import Validate exposing (Valid, fromValid)
+import Journey exposing (JourneyQuery)
 
 
 request :
@@ -82,7 +83,12 @@ stations stationQuery =
 
 -- INTERNAL
 
+journeys : JourneyQuery -> Endpoint
+journeys journeyQuery = 
+    url [ "journeys?select=*,departure_station:stations!journeys_departure_station_id_fkey(*),return_station:stations!journeys_return_station_id_fkey(*)" ] []
 
 internalStations : List QueryParameter -> Endpoint
 internalStations params =
     url [ "stations" ] params
+
+
