@@ -14,7 +14,8 @@ BEGIN
             return_time,
             departure_station_id,
             return_station_id,
-            distance_in_meters
+            distance_in_meters,
+            duration_in_seconds
         FROM
             internal.journeys; 
     ', utils.get_api_schema());

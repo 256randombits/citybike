@@ -85,7 +85,7 @@ stations stationQuery =
 
 journeys : JourneyQuery -> Endpoint
 journeys journeyQuery = 
-    url [ "journeys?select=*,departure_station:stations!journeys_departure_station_id_fkey(*),return_station:stations!journeys_return_station_id_fkey(*)" ] []
+    url [ "journeys?select=*,departure_station:stations!departure_station(*),return_station:stations!return_station(*)" ] []
 
 internalStations : List QueryParameter -> Endpoint
 internalStations params =

@@ -8,7 +8,7 @@ module Journey exposing
     , getDepartureTime
     , getDistanceInMeters
     , getReturnStation
-    , getReturnTime
+    , getReturnTime, getDurationInSeconds
     )
 
 import Json.Decode as Decode exposing (Decoder, int, string)
@@ -30,11 +30,12 @@ type Journey
         , departureStation : Station
         , returnStation : Station
         , distanceInMeters : Int
+        , durationInSeconds : Int
         }
 
 
-createJourney : Int -> String -> String -> Station -> Station -> Int -> Journey
-createJourney id departureTime returnTime departureStation returnStation distanceInMeters =
+createJourney : Int -> String -> String -> Station -> Station -> Int -> Int -> Journey
+createJourney id departureTime returnTime departureStation returnStation distanceInMeters durationInSeconds =
     Journey
         { id = id
         , departureTime = departureTime
@@ -42,6 +43,7 @@ createJourney id departureTime returnTime departureStation returnStation distanc
         , departureStation = departureStation
         , returnStation = returnStation
         , distanceInMeters = distanceInMeters
+        , durationInSeconds = durationInSeconds
         }
 
 
@@ -54,6 +56,7 @@ decoder =
         |> required "departure_station" Station.decoder
         |> required "return_station" Station.decoder
         |> required "distance_in_meters" int
+        |> required "duration_in_seconds" int
 
 
 encoder : Journey -> Encode.Value
@@ -87,7 +90,11 @@ getReturnStation : Journey -> Station
 getReturnStation (Journey values) =
     values.returnStation
 
-
 getDistanceInMeters : Journey -> Int
 getDistanceInMeters (Journey values) =
     values.distanceInMeters
+
+getDurationInSeconds : Journey -> Int
+getDurationInSeconds (Journey values) =
+    values.durationInSeconds
+

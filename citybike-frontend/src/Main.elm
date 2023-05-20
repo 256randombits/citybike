@@ -403,12 +403,13 @@ viewJourneyInAList journey =
     let
         singleCell x =
             td [ class "border-seperate border-spacing-2 border border-slate-400 p-2" ] [ x ]
+        precision2 x = x * 100 |> floor |> toFloat |> (\y -> y / 100)
     in
     tr []
         [ journey |> Journey.getDepartureStation |> Station.getNameFi |> text |> singleCell
         , journey |> Journey.getReturnStation |> Station.getNameFi |> text |> singleCell
         , journey |> Journey.getDistanceInMeters |> toFloat |> (\x -> x / 1000) |> String.fromFloat |> text |> singleCell
-        , "TODO" |> text |> singleCell
+        , journey |> Journey.getDurationInSeconds |> toFloat |> (\x -> x / 60)|> precision2 |> String.fromFloat |> text |> singleCell
         ]
 
 
