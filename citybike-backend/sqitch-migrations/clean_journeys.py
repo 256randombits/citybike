@@ -1,5 +1,4 @@
 import pandas as pd
-# import numpy as np
 import requests
 import argparse
 import sys
@@ -25,7 +24,6 @@ def remove_journeys_with_non_int_distance(df):
 
 def remove_journeys_shorter_than_10_meters(df):
     df = df[df['distance_in_meters'].ge(10)]
-    print(df, file=sys.stderr)
     return df
 
 
@@ -78,16 +76,14 @@ def main():
         "departure_time", "return_time", "departure_station_id",
         "return_station_id", "distance_in_meters"
     ]
-    df = remove_journeys_with_non_int_distance(df)
+    df = (df
+          .pipe(remove_journeys_with_non_int_distance)
+          .pipe(remove_journeys_less_than_10_seconds)
+          .pipe(remove_journeys_with_invalid_stations, api=api)
+          .pipe(remove_journeys_shorter_than_10_meters)
+          )
 
-    df = remove_journeys_less_than_10_seconds(df)
-
-    df = remove_journeys_with_invalid_stations(df, api)
-
-    df = remove_journeys_shorter_than_10_meters(df)
-    # print(df.to_csv(index=False, float_format='{:,.0f}'.format))
     print(df.to_csv(index=False))
-    # print(df.to_csv())
 
 
 if __name__ == "__main__":

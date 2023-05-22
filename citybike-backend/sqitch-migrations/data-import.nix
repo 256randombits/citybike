@@ -42,35 +42,14 @@ let
       pkgs.writeShellScriptBin "import-journeys.sh" ''
         source ${setEnvironment}
 
-        
-        ${clean-journeys} --api ''${UPSTREAM} ${journeysCsv} | 
-          ${pkgs.curl}/bin/curl \
-          "''${UPSTREAM}"/journeys \
-          --include \
-          --header 'Content-Type: text/csv' \
-          --verbose \
-          --data-binary  @-
-
-        # cat <<EOF > tmp.txt
-        # Departure,Return,Departure station id,Departure station name,Return station id,Return station name,Covered distance (m),Duration (sec.)
-        # 2021-07-31T23:56:56,2021-08-01T00:14:07,161,Eteläesplanadi,031,Marian sairaala,2289,1027
-        # 2021-07-31T23:56:51,2021-08-01T00:21:34,120,Mäkelänkatu,094,Laajalahden aukio,5646,1479
-        # 2021-07-31T23:56:48,2021-08-01T00:03:53,116,Linnanmäki,113,Pasilan asema,1080,422
-        # 2021-07-31T23:56:38,2021-08-01T00:14:58,131,Elimäenkatu,035,Cygnaeuksenkatu,3755,1096
-        # EOF
-        # ${clean-journeys} --api ''${UPSTREAM} tmp.txt
-        # cat <<EOF | ${pkgs.curl}/bin/curl \
+        ${clean-journeys} --api ''${UPSTREAM} ${journeysCsv} > asd.csv
+        # ${clean-journeys} --api ''${UPSTREAM} ${journeysCsv} | 
+        #   ${pkgs.curl}/bin/curl \
         #   "''${UPSTREAM}"/journeys \
         #   --include \
         #   --header 'Content-Type: text/csv' \
         #   --verbose \
         #   --data-binary  @-
-        # ${newHeader}
-        # $(${clean-journeys} --api ''${UPSTREAM} ${journeysCsv} | 
-        #   tail -n+2 |
-        #   cut --complement --fields=4,6,8 --delimiter=, -)
-        # EOF
-
       '';
   };
 in
