@@ -37,19 +37,17 @@ let
           "clean_journeys.py"
           { libraries = with pkgs.python3Packages; [ pandas requests ]; }
           ./clean_journeys.py;
-        newHeader = "departure_time,return_time,departure_station_id,return_station_id,distance_in_meters";
       in
       pkgs.writeShellScriptBin "import-journeys.sh" ''
         source ${setEnvironment}
 
-        ${clean-journeys} --api ''${UPSTREAM} ${journeysCsv} > asd.csv
-        # ${clean-journeys} --api ''${UPSTREAM} ${journeysCsv} | 
-        #   ${pkgs.curl}/bin/curl \
-        #   "''${UPSTREAM}"/journeys \
-        #   --include \
-        #   --header 'Content-Type: text/csv' \
-        #   --verbose \
-        #   --data-binary  @-
+        ${clean-journeys} --api ''${UPSTREAM} ${journeysCsv} | 
+          ${pkgs.curl}/bin/curl \
+          "''${UPSTREAM}"/journeys \
+          --include \
+          --header 'Content-Type: text/csv' \
+          --verbose \
+          --data-binary  @-
       '';
   };
 in
