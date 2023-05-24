@@ -1,9 +1,8 @@
-module Api exposing (Error, showError, delete, get, post, put)
+module Api exposing (Error, delete, get, post, put, showError)
 
 import Api.Endpoint as Endpoint exposing (Endpoint)
-import Http as Http exposing (Body, Error(..))
+import Http exposing (Body, Error(..))
 import Json.Decode exposing (Decoder)
-
 
 
 get : Endpoint -> Decoder a -> (Result Http.Error a -> msg) -> Cmd msg
@@ -12,6 +11,7 @@ get url decoder whenReady =
         { method = "GET"
         , url = url
         , expect = Http.expectJson whenReady decoder
+
         -- , headers = [ Http.header "Range-Unit" "items", Http.header "Range" "10-19"]
         , headers = []
         , body = Http.emptyBody
@@ -57,19 +57,23 @@ delete url body decoder whenReady =
 
 
 -- Errors
-type alias Error = Http.Error
+
+
+type alias Error =
+    Http.Error
+
 
 showError : Http.Error -> String
 showError err =
     case err of
         BadUrl str ->
-          "BADURL: " ++ str
+            "BADURL: " ++ str
 
         Timeout ->
             "TIMEOUT"
 
         NetworkError ->
-           "NETWORKERROR"
+            "NETWORKERROR"
 
         BadStatus int ->
             "BadStatus" ++ String.fromInt int

@@ -36,7 +36,7 @@
             (import ./citybike-backend/sqitch-migrations/sqitch.nix
               { inherit pkgs flake-utils; }).apps
             //
-            (import ./citybike-backend/data-import.nix
+            (import ./citybike-backend/data-import/data-import.nix
               { inherit pkgs flake-utils csvFiles; }).apps
             //
             (import ./citybike-frontend/frontend.nix
