@@ -1,10 +1,9 @@
-module Api.Endpoint exposing (Endpoint, request, stations, journeys)
+module Api.Endpoint exposing (Endpoint, journeys, request, stations)
 
 import Http
-import Station exposing (StationQuery, unwrapAddressFi, unwrapCapacity, unwrapCityFi, unwrapId, unwrapNameFi, unwrapOperator)
-import Url.Builder as Builder exposing (QueryParameter, string)
-import Validate exposing (Valid, fromValid)
 import Journey exposing (JourneyQuery)
+import Station exposing (StationQuery, unwrapAddressFi, unwrapCapacity, unwrapCityFi, unwrapId, unwrapNameFi, unwrapOperator)
+import Url.Builder as Builder exposing (QueryParameter)
 
 
 request :
@@ -68,7 +67,7 @@ stations stationQuery =
                             [ Builder.string key ("eq." ++ unwrap wrappedString) ]
             in
             List.foldl (++)
-                [ Builder.string "limit" (String.fromInt stationQuery.limit), Builder.string "offset" (String.fromInt stationQuery.offset)]
+                [ Builder.string "limit" (String.fromInt stationQuery.limit), Builder.string "offset" (String.fromInt stationQuery.offset) ]
                 [ fieldToQueryParams "id" stationQuery.maybeId unwrapId
                 , fieldToQueryParams "name_fi" stationQuery.maybeNameFi unwrapNameFi
                 , fieldToQueryParams "address_fi" stationQuery.maybeAddressFi unwrapAddressFi
@@ -83,12 +82,12 @@ stations stationQuery =
 
 -- INTERNAL
 
+
 journeys : JourneyQuery -> Endpoint
-journeys journeyQuery = 
+journeys _ =
     url [ "journeys?select=*,departure_station:stations!departure_station(*),return_station:stations!return_station(*)" ] []
+
 
 internalStations : List QueryParameter -> Endpoint
 internalStations params =
     url [ "stations" ] params
-
-

@@ -7,14 +7,15 @@ module Journey exposing
     , getDepartureStation
     , getDepartureTime
     , getDistanceInMeters
+    , getDurationInSeconds
     , getReturnStation
-    , getReturnTime, getDurationInSeconds
+    , getReturnTime
     )
 
 import Json.Decode as Decode exposing (Decoder, int, string)
 import Json.Decode.Pipeline exposing (required)
 import Json.Encode as Encode
-import Station exposing (Station, decoder)
+import Station exposing (Station)
 
 
 type alias JourneyQuery =
@@ -90,11 +91,12 @@ getReturnStation : Journey -> Station
 getReturnStation (Journey values) =
     values.returnStation
 
+
 getDistanceInMeters : Journey -> Int
 getDistanceInMeters (Journey values) =
     values.distanceInMeters
 
+
 getDurationInSeconds : Journey -> Int
 getDurationInSeconds (Journey values) =
     values.durationInSeconds
-

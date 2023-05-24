@@ -7,7 +7,7 @@ import Html exposing (Html, button, div, input, p, table, tbody, td, text, th, t
 import Html.Attributes exposing (class, placeholder, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Journey exposing (Journey, JourneyQuery)
-import Json.Decode as Decode exposing (string)
+import Json.Decode as Decode
 import Station exposing (..)
 import Validate exposing (validate)
 
@@ -176,7 +176,7 @@ update msg model =
 
         GotJourneys result ->
             case model.results of
-                LoadingJourneys executedQuery ->
+                LoadingJourneys _ ->
                     case result of
                         Ok journeys ->
                             ( { model | results = HasJourneys journeys }, Cmd.none )
@@ -365,7 +365,7 @@ viewResults resultsMode results =
             LoadingJourneys _ ->
                 div [] [ text "Here you could see the results loading." ]
 
-            HasStations stationsList stationsSortBy executedQuery ->
+            HasStations stationsList stationsSortBy _->
                 case resultsMode of
                     MapMode ->
                         div [] [ text "Here you could see stations on a map." ]
@@ -379,7 +379,7 @@ viewResults resultsMode results =
 
 
 viewJourneysInAList : List Journey -> StationSortBy -> Html Msg
-viewJourneysInAList journeysList sortBy =
+viewJourneysInAList journeysList _ =
     let
         singleCell whenClicked x =
             th [ class "border-separate border-seperate border-spacing-2 border border-slate-400 p-2" ] [ button [ class "hover:bg-blue-800", onClick whenClicked ] [ x ] ]
@@ -403,13 +403,15 @@ viewJourneyInAList journey =
     let
         singleCell x =
             td [ class "border-seperate border-spacing-2 border border-slate-400 p-2" ] [ x ]
-        precision2 x = x * 100 |> floor |> toFloat |> (\y -> y / 100)
+
+        precision2 x =
+            x * 100 |> floor |> toFloat |> (\y -> y / 100)
     in
     tr []
         [ journey |> Journey.getDepartureStation |> Station.getNameFi |> text |> singleCell
         , journey |> Journey.getReturnStation |> Station.getNameFi |> text |> singleCell
         , journey |> Journey.getDistanceInMeters |> toFloat |> (\x -> x / 1000) |> String.fromFloat |> text |> singleCell
-        , journey |> Journey.getDurationInSeconds |> toFloat |> (\x -> x / 60)|> precision2 |> String.fromFloat |> text |> singleCell
+        , journey |> Journey.getDurationInSeconds |> toFloat |> (\x -> x / 60) |> precision2 |> String.fromFloat |> text |> singleCell
         ]
 
 
