@@ -1,4 +1,4 @@
-module Api.Endpoint exposing (Endpoint, journeys, request, stations)
+module Api.Endpoint exposing (Endpoint, journeys, request, stations, station)
 
 import Http
 import Journey exposing (JourneyQuery)
@@ -75,6 +75,15 @@ stations stationQuery =
                 , fieldToQueryParams "operator" stationQuery.maybeOperator unwrapOperator
                 , fieldToQueryParams "capacity" stationQuery.maybeCapacity unwrapCapacity
                 ]
+    in
+    internalStations queryParams
+
+
+station : Int -> Endpoint
+station id =
+    let
+        queryParams =
+            [ Builder.string "id" ("eq." ++ String.fromInt id) ]
     in
     internalStations queryParams
 

@@ -1,19 +1,38 @@
-module Api exposing (Error, delete, get, post, put, showError)
+module Api exposing (Error, delete, get, getSingular, post, put, showError)
 
 import Api.Endpoint as Endpoint exposing (Endpoint)
 import Http exposing (Body, Error(..))
 import Json.Decode exposing (Decoder)
 
 
+type GetMode
+    = Singular
+    | Normal
+
+
 get : Endpoint -> Decoder a -> (Result Http.Error a -> msg) -> Cmd msg
-get url decoder whenReady =
+get =
+    getInternal Normal
+
+
+getSingular : Endpoint -> Decoder a -> (Result Http.Error a -> msg) -> Cmd msg
+getSingular =
+    getInternal Singular
+
+
+getInternal : GetMode -> Endpoint -> Decoder a -> (Result Http.Error a -> msg) -> Cmd msg
+getInternal mode url decoder whenReady =
     Endpoint.request
         { method = "GET"
         , url = url
         , expect = Http.expectJson whenReady decoder
+        , headers =
+            case mode of
+                Singular ->
+                    [ Http.header "Accept" "application/vnd.pgrst.object+json" ]
 
-        -- , headers = [ Http.header "Range-Unit" "items", Http.header "Range" "10-19"]
-        , headers = []
+                Normal ->
+                    []
         , body = Http.emptyBody
         , timeout = Nothing
         }
@@ -65,18 +84,33 @@ type alias Error =
 
 showError : Http.Error -> String
 showError err =
+    let
+        somethingWentWrong =
+            "Something went wrong."
+    in
     case err of
-        BadUrl str ->
-            "BADURL: " ++ str
-
         Timeout ->
-            "TIMEOUT"
+            "Request timed out."
 
         NetworkError ->
-            "NETWORKERROR"
+            "No network."
 
         BadStatus int ->
-            "BadStatus" ++ String.fromInt int
+            -- https://postgrest.org/en/stable/references/api/resource_representation.html?highlight=plural#singular-or-plural
+            -- PostgREST says 406 means that the entry was not found.
+            if int == 406 then
+                "Does not exist."
 
+            else
+                somethingWentWrong
+
+        BadUrl str ->
+            somethingWentWrong
+
+        -- "BADURL: " ++ str
         BadBody str ->
-            "BADBODY: " ++ str
+            somethingWentWrong
+
+
+
+-- "BADBODY: " ++ str
