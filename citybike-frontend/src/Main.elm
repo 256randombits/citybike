@@ -2,17 +2,16 @@ module Main exposing (main)
 
 import Browser exposing (Document)
 import Browser.Navigation as Nav
-import Html exposing (div, text)
+import Html
 import Page
 import Page.Blank as Blank
 import Page.Home as Home
 import Page.NotFound as NotFound
-import Page.Station as Station
+import Page.QueryTool as QueryTool
+import Page.Stations as Stations
 import Route exposing (..)
 import Session exposing (Session)
-import Station exposing (Station)
 import Url exposing (Url)
-import Page.QueryTool as QueryTool
 
 
 main : Program () Model Msg
@@ -41,7 +40,7 @@ type Model
     = NotFound Session
     | Redirect Session
     | Home Home.Model
-    | Station Station.Model
+    | Stations Stations.Model
     | QueryTool QueryTool.Model
 
 
@@ -63,9 +62,9 @@ changeRouteTo route model =
             Home.init session
                 |> updateWith Home GotHomeMsg
 
-        Just Route.Station ->
-            Station.init session
-                |> updateWith Station GotStationMsg
+        Just Route.Stations ->
+            Stations.init session
+                |> updateWith Stations GotStationMsg
 
         Just Route.QueryTool ->
             QueryTool.init session
@@ -76,7 +75,7 @@ type Msg
     = ChangedUrl Url
     | RequestedUrl Browser.UrlRequest
     | GotHomeMsg Home.Msg
-    | GotStationMsg Station.Msg
+    | GotStationMsg Stations.Msg
     | GotQueryToolMsg QueryTool.Msg
 
 
@@ -113,9 +112,9 @@ update msg model =
 
         GotStationMsg stationMsg ->
             case model of
-                Station station ->
-                    Station.update stationMsg station
-                        |> updateWith Station GotStationMsg
+                Stations station ->
+                    Stations.update stationMsg station
+                        |> updateWith Stations GotStationMsg
 
                 _ ->
                     noChange
@@ -142,8 +141,8 @@ toSession page =
         Home home ->
             Home.toSession home
 
-        Station station ->
-            Station.toSession station
+        Stations station ->
+            Stations.toSession station
 
         QueryTool queryTool ->
             QueryTool.toSession queryTool
@@ -182,9 +181,8 @@ view model =
         Home home ->
             viewPage GotHomeMsg (Home.view home)
 
-        Station station ->
-            viewPage GotStationMsg (Station.view station)
+        Stations station ->
+            viewPage GotStationMsg (Stations.view station)
 
         QueryTool queryTool ->
             viewPage GotQueryToolMsg (QueryTool.view queryTool)
-

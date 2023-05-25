@@ -9,7 +9,7 @@ import Url.Parser as Parser exposing (Parser, oneOf, s)
 
 type Route
     = Home
-    | Station
+    | Stations
     | QueryTool
 
 
@@ -17,7 +17,7 @@ parser : Parser (Route -> a) a
 parser =
     oneOf
         [ Parser.map Home Parser.top
-        , Parser.map Station (s "station")
+        , Parser.map Stations (s "stations")
         , Parser.map QueryTool (s "query-tool")
         ]
 
@@ -51,8 +51,8 @@ routeToPieces page =
     case page of
         Home ->
             []
-        Station ->
-            [ "station" ]
+        Stations ->
+            [ "stations" ]
         QueryTool ->
             [ "query-tool" ]
 

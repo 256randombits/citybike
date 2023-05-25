@@ -1,4 +1,4 @@
-module Page.Station exposing (Model, Msg, init, toSession, update, view)
+module Page.Stations exposing (Model, Msg, init, toSession, update, view)
 
 import Html exposing (..)
 import Session exposing (Session)
@@ -9,7 +9,6 @@ import Session exposing (Session)
 
 
 type alias Model =
-    -- TODO: Home does not actually use session?
     { session : Session }
 
 
