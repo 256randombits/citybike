@@ -1,7 +1,7 @@
 module Page exposing (view)
 
 import Browser exposing (Document)
-import Html exposing (Html, a, div, nav, text)
+import Html exposing (Html, a, nav, text)
 import Html.Attributes exposing (class)
 import Route
 

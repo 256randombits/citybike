@@ -1,4 +1,4 @@
-module Page.Home exposing (Model, Msg, init, toSession, update, view)
+module Page.SingleStation exposing (Model, Msg, init, toSession, update, view)
 
 import Html exposing (..)
 import Session exposing (Session)
@@ -9,12 +9,12 @@ import Session exposing (Session)
 
 
 type alias Model =
-    { session : Session }
+    { session : Session, id : Int }
 
 
-init : Session -> ( Model, Cmd Msg )
-init session =
-    ( { session = session }, Cmd.none )
+init : Session -> Int -> ( Model, Cmd Msg )
+init session id =
+    ( { session = session, id = id }, Cmd.none )
 
 
 
@@ -23,8 +23,8 @@ init session =
 
 view : Model -> { title : String, content : Html Msg }
 view _ =
-    { title = "Citybike"
-    , content = div [] [ text "HOME PAGE" ]
+    { title = "Single"
+    , content = div [] [ text "Single Station" ]
     }
 
 
@@ -42,5 +42,7 @@ update msg model =
         NoOp ->
             ( model, Cmd.none )
 
+
 toSession : Model -> Session
-toSession model = model.session
+toSession model =
+    model.session

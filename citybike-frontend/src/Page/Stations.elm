@@ -42,5 +42,7 @@ update msg model =
         NoOp ->
             ( model, Cmd.none )
 
+
 toSession : Model -> Session
-toSession model = model.session
+toSession model =
+    model.session

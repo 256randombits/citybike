@@ -4,11 +4,12 @@ import Browser.Navigation as Nav
 import Html exposing (Attribute)
 import Html.Attributes as Attr
 import Url exposing (Url)
-import Url.Parser as Parser exposing (Parser, oneOf, s)
+import Url.Parser as Parser exposing (Parser, oneOf, s, (</>), int)
 
 
 type Route
     = Home
+    | SingleStation Int
     | Stations
     | QueryTool
 
@@ -17,6 +18,7 @@ parser : Parser (Route -> a) a
 parser =
     oneOf
         [ Parser.map Home Parser.top
+        , Parser.map SingleStation (s "stations" </> int)
         , Parser.map Stations (s "stations")
         , Parser.map QueryTool (s "query-tool")
         ]
@@ -51,8 +53,12 @@ routeToPieces page =
     case page of
         Home ->
             []
+
+        SingleStation id ->
+            [ "stations", String.fromInt id ]
+
         Stations ->
             [ "stations" ]
+
         QueryTool ->
             [ "query-tool" ]
-
