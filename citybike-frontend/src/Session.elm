@@ -12,5 +12,7 @@ empty : Nav.Key -> Session
 empty navKey =
     Session { navKey = navKey, stations = [] }
 
+
 getNavKey : Session -> Nav.Key
-getNavKey (Session fields) = fields.navKey
+getNavKey (Session fields) =
+    fields.navKey

@@ -26,4 +26,5 @@ viewHeader =
     nav [ class "flex sm:justify-center space-x-4" ]
         [ navBarLink Route.Home "HOME"
         , navBarLink Route.Station "STATION"
+        , navBarLink Route.QueryTool "QueryTool"
         ]

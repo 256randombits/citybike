@@ -1,31 +1,15 @@
-module QueryTool exposing (main)
+module Page.QueryTool exposing (Model, Msg, init, toSession, update, view)
 
 import Api
 import Api.Endpoint as Endpoint
-import Browser
 import Html exposing (Html, button, div, input, p, table, tbody, td, text, th, thead, tr)
 import Html.Attributes exposing (class, placeholder, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Journey exposing (Journey, JourneyQuery)
 import Json.Decode as Decode
+import Session exposing (Session)
 import Station exposing (..)
 import Validate exposing (validate)
-
-
-
--- MAIN
-
-
-main : Program () Model Msg
-main =
-    Browser.application
-        { init = \_ _ _ -> ( initQueryTool, Cmd.none )
-        , view = \model -> { title = "Citybike", body = [ view model ] }
-        , update = update
-        , subscriptions = \_ -> Sub.none
-        , onUrlRequest = \_ -> NoOp
-        , onUrlChange = \_ -> NoOp
-        }
 
 
 
@@ -38,6 +22,7 @@ type alias Model =
     , journeyQuery : JourneyQuery
     , resultsMode : ResultsMode
     , results : Results
+    , session : Session
     }
 
 
@@ -69,14 +54,17 @@ type QueryMode
     | StationMode
 
 
-initQueryTool : Model
-initQueryTool =
-    { queryMode = StationMode
-    , resultsMode = ListMode
-    , stationQuery = emptyQuery
-    , journeyQuery = { id = Nothing }
-    , results = HasNothing
-    }
+init : Session -> ( Model, Cmd Msg )
+init session =
+    ( { queryMode = StationMode
+      , resultsMode = ListMode
+      , stationQuery = emptyQuery
+      , journeyQuery = { id = Nothing }
+      , results = HasNothing
+      , session = session
+      }
+    , Cmd.none
+    )
 
 
 
@@ -196,12 +184,15 @@ update msg model =
 -- VIEW
 
 
-view : Model -> Html Msg
+view : Model -> { title : String, content : Html Msg }
 view model =
-    div [ class "flex flex-col gap-4 h-screen p-4 bg-gray-900 text-black" ]
-        [ viewQueryTool model.queryMode model.stationQuery model.journeyQuery
-        , viewResultsViewer model.resultsMode model.results
-        ]
+    { title = "Query Tool"
+    , content =
+        div [ class "flex flex-col gap-4 h-screen p-4 bg-gray-900 text-black" ]
+            [ viewQueryTool model.queryMode model.stationQuery model.journeyQuery
+            , viewResultsViewer model.resultsMode model.results
+            ]
+    }
 
 
 viewQueryTool : QueryMode -> StationQuery -> JourneyQuery -> Html Msg
@@ -365,7 +356,7 @@ viewResults resultsMode results =
             LoadingJourneys _ ->
                 div [] [ text "Here you could see the results loading." ]
 
-            HasStations stationsList stationsSortBy _->
+            HasStations stationsList stationsSortBy _ ->
                 case resultsMode of
                     MapMode ->
                         div [] [ text "Here you could see stations on a map." ]
@@ -480,3 +471,8 @@ viewResultsModeSelector resultsMode =
 
         ListMode ->
             div [] [ text "Here you could see that the list mode is active." ]
+
+
+toSession : Model -> Session
+toSession model =
+    model.session

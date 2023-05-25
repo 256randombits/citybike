@@ -4,14 +4,15 @@ import Browser exposing (Document)
 import Browser.Navigation as Nav
 import Html exposing (div, text)
 import Page
+import Page.Blank as Blank
 import Page.Home as Home
+import Page.NotFound as NotFound
 import Page.Station as Station
 import Route exposing (..)
 import Session exposing (Session)
 import Station exposing (Station)
 import Url exposing (Url)
-import Page.NotFound as NotFound
-import Page.Blank as Blank
+import Page.QueryTool as QueryTool
 
 
 main : Program () Model Msg
@@ -37,10 +38,11 @@ init _ url navKey =
 
 
 type Model
-    = Home Home.Model
-    | NotFound Session
-    | Station Station.Model
+    = NotFound Session
     | Redirect Session
+    | Home Home.Model
+    | Station Station.Model
+    | QueryTool QueryTool.Model
 
 
 
@@ -65,13 +67,17 @@ changeRouteTo route model =
             Station.init session
                 |> updateWith Station GotStationMsg
 
+        Just Route.QueryTool ->
+            QueryTool.init session
+                |> updateWith QueryTool GotQueryToolMsg
+
 
 type Msg
-    = GotHomeMsg Home.Msg
-    | GotStationMsg Station.Msg
-    | ChangedUrl Url
+    = ChangedUrl Url
     | RequestedUrl Browser.UrlRequest
-
+    | GotHomeMsg Home.Msg
+    | GotStationMsg Station.Msg
+    | GotQueryToolMsg QueryTool.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -96,7 +102,6 @@ update msg model =
         ChangedUrl url ->
             changeRouteTo (Route.fromUrl url) model
 
-
         GotHomeMsg homeMsg ->
             case model of
                 Home home ->
@@ -107,10 +112,19 @@ update msg model =
                     noChange
 
         GotStationMsg stationMsg ->
-          case model of
+            case model of
                 Station station ->
                     Station.update stationMsg station
                         |> updateWith Station GotStationMsg
+
+                _ ->
+                    noChange
+
+        GotQueryToolMsg queryToolMsg ->
+            case model of
+                QueryTool queryTool ->
+                    QueryTool.update queryToolMsg queryTool
+                        |> updateWith QueryTool GotQueryToolMsg
 
                 _ ->
                     noChange
@@ -130,6 +144,9 @@ toSession page =
 
         Station station ->
             Station.toSession station
+
+        QueryTool queryTool ->
+            QueryTool.toSession queryTool
 
 
 updateWith : (subModel -> Model) -> (subMsg -> Msg) -> ( subModel, Cmd subMsg ) -> ( Model, Cmd Msg )
@@ -167,3 +184,7 @@ view model =
 
         Station station ->
             viewPage GotStationMsg (Station.view station)
+
+        QueryTool queryTool ->
+            viewPage GotQueryToolMsg (QueryTool.view queryTool)
+

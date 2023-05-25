@@ -1,6 +1,5 @@
 module Page.Station exposing (Model, Msg, init, toSession, update, view)
 
-import Browser.Navigation as Nav
 import Html exposing (..)
 import Session exposing (Session)
 
