@@ -10,6 +10,8 @@ import Route exposing (..)
 import Session exposing (Session)
 import Station exposing (Station)
 import Url exposing (Url)
+import Page.NotFound as NotFound
+import Page.Blank as Blank
 
 
 main : Program () Model Msg
@@ -155,10 +157,10 @@ view model =
     in
     case model of
         Redirect _ ->
-            { title = "Redirect", body = [ div [] [ text "OMW" ] ] }
+            Page.view Blank.view
 
         NotFound _ ->
-            { title = "404", body = [ div [] [ text "This page does not exist." ] ] }
+            Page.view NotFound.view
 
         Home home ->
             viewPage GotHomeMsg (Home.view home)
