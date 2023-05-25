@@ -1,8 +1,15 @@
 module Main exposing (main)
 
 import Browser exposing (Document)
-import Html exposing (Html, div, text)
+import Browser.Navigation as Nav
+import Html exposing (div, text)
+import Page
 import Page.Home as Home
+import Page.Station as Station
+import Route exposing (..)
+import Session exposing (Session)
+import Station exposing (Station)
+import Url exposing (Url)
 
 
 main : Program () Model Msg
@@ -12,8 +19,8 @@ main =
         , view = view
         , update = update
         , subscriptions = \_ -> Sub.none
-        , onUrlRequest = \_ -> NoOp
-        , onUrlChange = \_ -> NoOp
+        , onUrlRequest = RequestedUrl
+        , onUrlChange = ChangedUrl
         }
 
 
@@ -21,46 +28,140 @@ main =
 -- MODEL
 
 
-type alias Model =
-    { page : Page
-    }
+init : () -> Url -> Nav.Key -> ( Model, Cmd Msg )
+init _ url navKey =
+    changeRouteTo (Route.fromUrl url)
+        (Redirect (Session.empty navKey))
 
 
-type Page
+type Model
     = Home Home.Model
-    | NotFound
-
-
-init _ url key =
-    ( { page = NotFound }, Cmd.none )
-
-
-
--- VIEW
-
-
-view : Model -> { title : String, body : List (Html Msg) }
-view model =
-    { title = "Citybike"
-    , body =
-        [ case model.page of
-            _ ->
-                div [] [ text "hmm" ]
-        ]
-    }
+    | NotFound Session
+    | Station Station.Model
+    | Redirect Session
 
 
 
 -- UPDATE
 
 
+changeRouteTo : Maybe Route -> Model -> ( Model, Cmd Msg )
+changeRouteTo route model =
+    let
+        session =
+            toSession model
+    in
+    case route of
+        Nothing ->
+            ( NotFound session, Cmd.none )
+
+        Just Route.Home ->
+            Home.init session
+                |> updateWith Home GotHomeMsg
+
+        Just Route.Station ->
+            Station.init session
+                |> updateWith Station GotStationMsg
+
+
 type Msg
-    = NoOp
-    | GotHomeMsg Home.Msg
+    = GotHomeMsg Home.Msg
+    | GotStationMsg Station.Msg
+    | ChangedUrl Url
+    | RequestedUrl Browser.UrlRequest
+
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update msg _ =
+update msg model =
+    let
+        noChange =
+            ( model, Cmd.none )
+    in
     case msg of
-        _ ->
-            ( { page = NotFound }, Cmd.none )
+        RequestedUrl urlRequest ->
+            case urlRequest of
+                Browser.Internal url ->
+                    ( model
+                    , Nav.pushUrl (Session.getNavKey (toSession model)) (Url.toString url)
+                    )
+
+                Browser.External href ->
+                    ( model
+                    , Nav.load href
+                    )
+
+        ChangedUrl url ->
+            changeRouteTo (Route.fromUrl url) model
+
+
+        GotHomeMsg homeMsg ->
+            case model of
+                Home home ->
+                    Home.update homeMsg home
+                        |> updateWith Home GotHomeMsg
+
+                _ ->
+                    noChange
+
+        GotStationMsg stationMsg ->
+          case model of
+                Station station ->
+                    Station.update stationMsg station
+                        |> updateWith Station GotStationMsg
+
+                _ ->
+                    noChange
+
+
+toSession : Model -> Session
+toSession page =
+    case page of
+        Redirect session ->
+            session
+
+        NotFound session ->
+            session
+
+        Home home ->
+            Home.toSession home
+
+        Station station ->
+            Station.toSession station
+
+
+updateWith : (subModel -> Model) -> (subMsg -> Msg) -> ( subModel, Cmd subMsg ) -> ( Model, Cmd Msg )
+updateWith toModel toMsg ( subModel, subCmd ) =
+    ( toModel subModel
+    , Cmd.map toMsg subCmd
+    )
+
+
+
+-- View
+
+
+view : Model -> Document Msg
+view model =
+    let
+        viewPage toMsg subView =
+            let
+                { title, body } =
+                    Page.view subView
+            in
+            { title = title
+            , body = List.map (Html.map toMsg) body
+            }
+    in
+    case model of
+        Redirect _ ->
+            { title = "Redirect", body = [ div [] [ text "OMW" ] ] }
+
+        NotFound _ ->
+            { title = "404", body = [ div [] [ text "This page does not exist." ] ] }
+
+        Home home ->
+            viewPage GotHomeMsg (Home.view home)
+
+        Station station ->
+            viewPage GotStationMsg (Station.view station)

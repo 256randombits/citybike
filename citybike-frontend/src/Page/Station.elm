@@ -1,4 +1,4 @@
-module Page.Home exposing (Model, Msg, init, toSession, update, view)
+module Page.Station exposing (Model, Msg, init, toSession, update, view)
 
 import Browser.Navigation as Nav
 import Html exposing (..)
@@ -25,8 +25,8 @@ init session =
 
 view : Model -> { title : String, content : Html Msg }
 view _ =
-    { title = "Citybike"
-    , content = div [] [ text "HOME PAGE" ]
+    { title = "STATION"
+    , content = div [] [ text "STATION PAGE" ]
     }
 
 

@@ -1,4 +1,59 @@
-module Station exposing (AddressFi(..), AddressSv(..), Capacity(..), CityFi(..), CitySv(..), Id(..), Latitude(..), Longitude(..), NameEn(..), NameFi(..), NameSv(..), Operator(..), Station, StationQuery, createStation, decoder, emptyQuery, getAddressFi, getAddressSv, getCapacity, getCityFi, getCitySv, getId, getNameEn, getNameFi, getNameSv, getOperator, getX, getY, stationQueryValidator, unwrapAddressFi, unwrapAddressSv, unwrapCapacity, unwrapCityFi, unwrapCitySv, unwrapId, unwrapLatitude, unwrapLongitude, unwrapNameEn, unwrapNameFi, unwrapNameSv, unwrapOperator, validateAddressFi, validateAddressSv, validateCapacity, validateCityFi, validateCitySv, validateId, validateLatitude, validateLongitude, validateNameEn, validateNameFi, validateNameSv, validateOperator)
+module Station exposing
+    ( AddressFi(..)
+    , AddressSv(..)
+    , Capacity(..)
+    , CityFi(..)
+    , CitySv(..)
+    , Id(..)
+    , Latitude(..)
+    , Longitude(..)
+    , NameEn(..)
+    , NameFi(..)
+    , NameSv(..)
+    , Operator(..)
+    , Station
+    , StationQuery
+    , createStation
+    , decoder
+    , emptyQuery
+    , getAddressFi
+    , getAddressSv
+    , getCapacity
+    , getCityFi
+    , getCitySv
+    , getId
+    , getNameEn
+    , getNameFi
+    , getNameSv
+    , getOperator
+    , getX
+    , getY
+    , stationQueryValidator
+    , unwrapAddressFi
+    , unwrapAddressSv
+    , unwrapCapacity
+    , unwrapCityFi
+    , unwrapCitySv
+    , unwrapId
+    , unwrapLatitude
+    , unwrapLongitude
+    , unwrapNameEn
+    , unwrapNameFi
+    , unwrapNameSv
+    , unwrapOperator
+    , validateAddressFi
+    , validateAddressSv
+    , validateCapacity
+    , validateCityFi
+    , validateCitySv
+    , validateId
+    , validateLatitude
+    , validateLongitude
+    , validateNameEn
+    , validateNameFi
+    , validateNameSv
+    , validateOperator
+    )
 
 import Json.Decode exposing (Decoder, float, int, string)
 import Json.Decode.Pipeline exposing (required)
