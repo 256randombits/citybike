@@ -8,3 +8,4 @@ journeys [stations] 2023-05-16T10:09:20Z mfail <mfail@desknix> # Add stations ta
 api_stations [stations initialize_postgrest] 2023-05-16T12:36:48Z mfail <mfail@desknix> # Create view for stations in api schema.
 api_journeys [journeys initialize_postgrest] 2023-05-16T15:25:48Z mfail <mfail@desknix> # Add journeys into api.
 api_station_stats [journeys initialize_postgrest] 2023-05-26T12:10:50Z mfail <mfail@desknix> # Get information about a single station.
+api_stats_station_departures [journeys initialize_postgrest] 2023-05-26T22:57:10Z mfail <mfail@desknix> # Add endpoint to get the amount of departures from station.
