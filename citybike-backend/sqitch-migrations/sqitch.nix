@@ -17,8 +17,16 @@
 
       sqitchInit = pkgs.writeShellScript "initialize-sqitch-env.sh" ''
         PROJECTPATH=$(${pkgs.git}/bin/git rev-parse --show-toplevel)
-        PLANFILE=''${PROJECTPATH}/citybike-backend/sqitch-migrations/sqitch.plan
+        MIGRATIONSPATH=''${PROJECTPATH}/citybike-backend/sqitch-migrations
+        PLANFILE=''${MIGRATIONSPATH}/sqitch.plan
         source ''${PROJECTPATH}/citybike-backend/.env
+
+        # Sqitch does not seem to have any other way of accessing
+        # the deploy/ revert/ and verify/ directories.
+        pushd ''${MIGRATIONSPATH}
+      '';
+      sqitchTerminate = pkgs.writeShellScript "terminate-sqitch-env.sh" ''
+        popd
       '';
     in
     {
@@ -31,6 +39,8 @@
             --plan-file ''${PLANFILE} \
             --target db:pg://''${POSTGRES_USER}:''${POSTGRES_PASSWORD}@''${POSTGRES_SERVER_URL}:''${POSTGRES_PORT}/''${POSTGRES_DB} \
             --verify
+
+          source ${sqitchTerminate}
         '';
       };
       revert = flake-utils.lib.mkApp {
@@ -41,6 +51,8 @@
             --client ${pkgs.postgresql_15}/bin/psql \
             --plan-file ''${PLANFILE} \
             --target db:pg://''${POSTGRES_USER}:''${POSTGRES_PASSWORD}@''${POSTGRES_SERVER_URL}:''${POSTGRES_PORT}/''${POSTGRES_DB}
+
+          source ${sqitchTerminate}
         '';
       };
       add = flake-utils.lib.mkApp {
@@ -50,6 +62,8 @@
           ${pkgs.sqitchPg}/bin/sqitch add \
             --plan-file ''${PLANFILE} \
             ''$@
+
+          source ${sqitchTerminate}
         '';
       };
     };

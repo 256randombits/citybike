@@ -52,10 +52,21 @@ let
   };
 in
 {
-  apps = {
-    import-stations = import-stations;
+  apps = rec {
+    import-stations-all = import-stations;
     import-journeys-05 = import-journeys csvFiles.journeys05-csv;
     import-journeys-06 = import-journeys csvFiles.journeys06-csv;
     import-journeys-07 = import-journeys csvFiles.journeys07-csv;
+    # TODO: Maybe create a target which limits the count of the journeys
+    # for development purposes
+    # import-journeys-dev =
+    import-journeys-all = flake-utils.lib.mkApp {
+      drv =
+        pkgs.writeShellScriptBin "import-journeys-all.sh" ''
+          ${import-journeys-05.program}
+          ${import-journeys-06.program}
+          ${import-journeys-07.program}
+        '';
+    };
   };
 }

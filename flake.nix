@@ -31,16 +31,32 @@
         in
         {
           packages = rec { };
-          apps = rec { }
-            //
-            (import ./citybike-backend/sqitch-migrations/sqitch.nix
-              { inherit pkgs flake-utils; }).apps
-            //
-            (import ./citybike-backend/data-import/data-import.nix
-              { inherit pkgs flake-utils csvFiles; }).apps
-            //
-            (import ./citybike-frontend/frontend.nix
-              { inherit pkgs flake-utils; }).apps;
+          apps = rec {
+            destroy-and-initialize =
+              let
+                revert = self.apps."${system}".revert.program;
+                deploy = self.apps."${system}".deploy.program;
+                import-stations-all = self.apps."${system}".import-stations-all.program;
+                import-journeys-all = self.apps."${system}".import-journeys-all.program;
+              in
+              flake-utils.lib.mkApp {
+                drv = pkgs.writeShellScriptBin "all.sh" ''
+                  ${revert}
+                  ${deploy}
+                  ${import-stations-all}
+                  ${import-journeys-all}
+                '';
+              };
+          }
+          //
+          (import ./citybike-backend/sqitch-migrations/sqitch.nix
+            { inherit pkgs flake-utils; }).apps
+          //
+          (import ./citybike-backend/data-import/data-import.nix
+            { inherit pkgs flake-utils csvFiles; }).apps
+          //
+          (import ./citybike-frontend/frontend.nix
+            { inherit pkgs flake-utils; }).apps;
 
           devShells = {
             default = pkgs.mkShell {
