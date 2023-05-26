@@ -38,7 +38,8 @@
             --client ${pkgs.postgresql_15}/bin/psql \
             --plan-file ''${PLANFILE} \
             --target db:pg://''${POSTGRES_USER}:''${POSTGRES_PASSWORD}@''${POSTGRES_SERVER_URL}:''${POSTGRES_PORT}/''${POSTGRES_DB} \
-            --verify
+            --verify \
+            ''$@
 
           source ${sqitchTerminate}
         '';
@@ -50,7 +51,8 @@
           ${pkgs.sqitchPg}/bin/sqitch revert \
             --client ${pkgs.postgresql_15}/bin/psql \
             --plan-file ''${PLANFILE} \
-            --target db:pg://''${POSTGRES_USER}:''${POSTGRES_PASSWORD}@''${POSTGRES_SERVER_URL}:''${POSTGRES_PORT}/''${POSTGRES_DB}
+            --target db:pg://''${POSTGRES_USER}:''${POSTGRES_PASSWORD}@''${POSTGRES_SERVER_URL}:''${POSTGRES_PORT}/''${POSTGRES_DB} \
+            ''$@
 
           source ${sqitchTerminate}
         '';
