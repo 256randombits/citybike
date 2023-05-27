@@ -11,7 +11,7 @@ EXECUTE FORMAT('
     SELECT
         s_dep.id AS station_id,
 
-        COUNT(j.departure_station_id) AS amount,
+        COUNT(j.departure_station_id) AS departures_count,
 
         AVG(j.distance_in_meters) AS average_distance_in_meters
 
@@ -28,7 +28,7 @@ EXECUTE FORMAT('
     SELECT
         s_dep.id AS station_id,
 
-        COUNT(j.departure_station_id) AS amount,
+        COUNT(j.departure_station_id) AS departures_count,
 
         AVG(j.distance_in_meters) AS average_distance_in_meters,
 

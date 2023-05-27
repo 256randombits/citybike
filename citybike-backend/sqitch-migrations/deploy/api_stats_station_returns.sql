@@ -10,9 +10,9 @@ BEGIN
 EXECUTE FORMAT('
   CREATE VIEW %I.stats_station_returns AS
     SELECT
-        s_dep.id AS id,
+        s_dep.id AS station_id,
 
-        COUNT(j.return_station_id) AS amount,
+        COUNT(j.return_station_id) AS returns_count,
 
         AVG(j.distance_in_meters) AS average_distance_in_meters
 
@@ -27,9 +27,11 @@ EXECUTE FORMAT('
 EXECUTE FORMAT('
   CREATE VIEW %I.stats_monthly_station_returns AS
     SELECT
-        s_dep.id AS id,
+        s_dep.id AS station_id,
 
-        COUNT(j.return_station_id) AS amount,
+        COUNT(j.return_station_id) AS returns_count,
+
+        AVG(j.distance_in_meters) AS average_distance_in_meters,
 
         date_trunc(''month'', j.return_time) month_timestamp
 
