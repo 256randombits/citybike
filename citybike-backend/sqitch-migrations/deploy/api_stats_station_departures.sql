@@ -9,9 +9,11 @@ BEGIN
 EXECUTE FORMAT('
   CREATE VIEW %I.stats_station_departures AS
     SELECT
-        s_dep.id AS id,
+        s_dep.id AS station_id,
 
-        COUNT(j.departure_station_id) AS amount
+        COUNT(j.departure_station_id) AS amount,
+
+        AVG(j.distance_in_meters) AS average_distance_in_meters
 
     FROM internal.journeys j
       RIGHT OUTER JOIN internal.stations s_dep ON j.departure_station_id = s_dep.id
@@ -24,9 +26,11 @@ EXECUTE FORMAT('
 EXECUTE FORMAT('
   CREATE VIEW %I.stats_monthly_station_departures AS
     SELECT
-        s_dep.id AS id,
+        s_dep.id AS station_id,
 
         COUNT(j.departure_station_id) AS amount,
+
+        AVG(j.distance_in_meters) AS average_distance_in_meters,
 
         date_trunc(''month'', j.departure_time) month_timestamp
 

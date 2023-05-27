@@ -12,7 +12,9 @@ EXECUTE FORMAT('
     SELECT
         s_dep.id AS id,
 
-        COUNT(j.return_station_id) AS amount
+        COUNT(j.return_station_id) AS amount,
+
+        AVG(j.distance_in_meters) AS average_distance_in_meters
 
     FROM internal.journeys j
       RIGHT OUTER JOIN internal.stations s_dep ON j.return_station_id = s_dep.id
