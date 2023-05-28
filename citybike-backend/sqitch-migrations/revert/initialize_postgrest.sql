@@ -1,12 +1,9 @@
--- Revert citybikes:initialize_postgrest from pg
+-- Revert bikeapp:initialize_postgrest from pg
+
 BEGIN;
 
-DO $$
-BEGIN
-    EXECUTE FORMAT('DROP SCHEMA %I CASCADE', utils.get_api_schema());
-    EXECUTE FORMAT('DROP ROLE %I', utils.get_anon_role());
-END
-$$;
+DROP SCHEMA api;
+DROP ROLE web_anon;
+-- DO NOT DROP AUTHENTICATOR ROLE
 
 COMMIT;
-

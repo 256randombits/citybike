@@ -29,7 +29,7 @@
         popd
       '';
     in
-    {
+    rec {
       deploy = flake-utils.lib.mkApp {
         drv = pkgs.writeShellScriptBin "sqitch-deploy" ''
           source ${sqitchInit}
@@ -66,6 +66,18 @@
             ''$@
 
           source ${sqitchTerminate}
+        '';
+      };
+      test-sqitch = flake-utils.lib.mkApp {
+        drv = pkgs.writeShellScriptBin "sqitch-add" ''
+          # Revert once to get the initial state.
+          ${revert.program}
+          # Can deploy?
+          ${deploy.program}
+          # Can revert?
+          ${revert.program}
+          # Revert actually worked?
+          ${deploy.program}
         '';
       };
     };
