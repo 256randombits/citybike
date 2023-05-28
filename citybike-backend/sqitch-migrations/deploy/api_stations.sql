@@ -15,7 +15,8 @@ SELECT
   OPERATOR,
   capacity,
   longitude,
-  latitude
+  latitude,
+  id_in_avoindata
 FROM
   internal.stations;
 

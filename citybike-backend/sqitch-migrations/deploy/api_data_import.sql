@@ -2,47 +2,47 @@
 -- requires: journeys
 BEGIN;
 
-ALTER TABLE internal.stations
-ADD COLUMN id_in_avoindata INTEGER UNIQUE;
-
-CREATE FUNCTION api.station_import(id INTEGER, name_fi VARCHAR(64), name_sv VARCHAR(64), name_en VARCHAR(64), address_fi VARCHAR(64), address_sv VARCHAR(64), city_fi VARCHAR(64), city_sv VARCHAR(64), operator VARCHAR(64), capacity INTEGER, longitude FLOAT, latitude FLOAT)
-RETURNS void AS $$
+CREATE FUNCTION api.journey_import(departure_time TIMESTAMPTZ, return_time TIMESTAMPTZ, departure_station_id INTEGER, return_station_id INTEGER, distance_in_meters INTEGER)
+  RETURNS void
+  AS $$
 DECLARE
-  id_here INTEGER;
+  departure_station_id_here INTEGER;
+  return_station_id_here INTEGER;
 BEGIN
-
-  INSERT INTO internal.stations(
-    id_in_avoindata,
-    name_fi,
-    name_sv,
-    name_en,
-    address_fi,
-    address_sv,
-    city_fi,
-    city_sv,
-    OPERATOR,
-    capacity,
-    longitude,
-    latitude)
+  -- departure_station_id_here
+  SELECT
+    id
+  FROM
+    api.stations
+  WHERE
+    id_in_avoindata = departure_station_id INTO departure_station_id_here;
+  -- return_station_id_here
+  SELECT
+    id
+  FROM
+    api.stations
+  WHERE
+    id_in_avoindata = return_station_id INTO return_station_id_here;
+  -- Insert
+  INSERT INTO api.journeys(
+    departure_time,
+    return_time,
+    departure_station_id,
+    return_station_id,
+    distance_in_meters)
   VALUES (
-    id,
-    name_fi,
-    name_sv,
-    name_en,
-    address_fi,
-    address_sv,
-    city_fi,
-    city_sv,
-    OPERATOR,
-    capacity,
-    longitude,
-    latitude);
+    departure_time,
+    return_time,
+    departure_station_id_here,
+    return_station_id_here,
+    distance_in_meters);
 
-END;
-$$ LANGUAGE plpgsql;
+  END;
+$$
+LANGUAGE plpgsql;
 
 -- Permissions
-GRANT EXECUTE ON FUNCTION api.station_import(id INTEGER, name_fi VARCHAR(64), name_sv VARCHAR(64), name_en VARCHAR(64), address_fi VARCHAR(64), address_sv VARCHAR(64), city_fi VARCHAR(64), city_sv VARCHAR(64), operator VARCHAR(64), capacity INTEGER, longitude FLOAT, latitude FLOAT) TO web_anon;
+GRANT EXECUTE ON FUNCTION api.journey_import(departure_time TIMESTAMPTZ, return_time TIMESTAMPTZ, departure_station_id INTEGER, return_station_id INTEGER, distance_in_meters INTEGER) to web_anon;
 
 NOTIFY pgrst,
 'reload schema';

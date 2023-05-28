@@ -26,7 +26,9 @@ VALUES (
   10,
   24.840319,
   60.16582);
+ROLLBACK;
 
+BEGIN;
 -- Can insert a station without the Engish name.
 INSERT INTO internal.stations(
   name_fi,
@@ -52,7 +54,9 @@ VALUES (
   10,
   24.840319,
   60.16582);
+ROLLBACK;
 
+BEGIN;
 -- Test that a null name can't be inserted.
 DO $$
 BEGIN
