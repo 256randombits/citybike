@@ -11,3 +11,4 @@ api_stats_station_departures [journeys initialize_postgrest] 2023-05-26T22:57:10
 api_stats_station_returns [journeys initialize_postgrest] 2023-05-26T23:23:10Z mfail <mfail@desknix> # Endpoint for total number of journeys ending at the station
 api_stats_station_to_station [journeys initialize_postgrest] 2023-05-27T13:40:12Z mfail <mfail@desknix> # Add view for statistics between two stations
 api_stats_station [journeys initialize_postgrest api_stats_station_departures api_stats_station_returns api_stats_station_to_station] 2023-05-27T19:47:41Z mfail <mfail@desknix> # Add view to combine the stats.
+api_top_five [api_stats_station] 2023-05-28T15:57:11Z mfail <mfail@desknix> # Add top5 computed columns to stats
