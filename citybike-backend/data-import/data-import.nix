@@ -14,14 +14,11 @@ let
             "clean_stations.py"
             { libraries = with pkgs.python3Packages; [ pandas ]; }
             ./clean_stations.py;
-        newHeader = "id,name_fi,name_sv,name_en,address_fi,address_sv,city_fi,city_sv,operator,capacity,x,y";
       in
       pkgs.writeShellScriptBin "import-stations.sh" ''
         source ${setEnvironment}
 
-        echo ${newHeader} | # Csv header with the right column names.
-          cat - <(tail -n+2 <(${clean-stations} ${csvFiles.stations-csv}) | # Drop the header line of the csv.
-          cut --complement -f 1 -d, -) | # Cut the first column (FID) as it's not used.
+        ${clean-stations} ${csvFiles.stations-csv} |
           ${pkgs.curl}/bin/curl \
             "''${UPSTREAM}"/stations \
             --include \
