@@ -50,7 +50,7 @@ EXECUTE FORMAT('
     SELECT
         s_ret.id AS station_id,
 
-        s_dep.id AS deparure_station_id,
+        s_dep.id AS departure_station_id,
 
         COUNT(j.departure_station_id) AS journeys_count,
 
@@ -71,7 +71,7 @@ EXECUTE FORMAT('
     SELECT
         station_id,
 
-        deparure_station_id,
+        departure_station_id,
 
         SUM(journeys_count) AS journeys_count,
 
@@ -79,7 +79,7 @@ EXECUTE FORMAT('
 
     FROM %I.stats_monthly_station_returns_to_station
 
-    GROUP BY station_id, deparure_station_id;
+    GROUP BY station_id, departure_station_id;
 
 ', utils.get_api_schema (), utils.get_api_schema ());
 
