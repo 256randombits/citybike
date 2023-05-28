@@ -3,3 +3,4 @@
 
 initialize_postgrest 2023-05-28T18:04:07Z mfail <mfail@desknix> # Create roles and schemas used by postgREST.
 stations 2023-05-28T18:48:53Z mfail <mfail@desknix> # Create stations table.
+journeys [stations] 2023-05-28T19:49:41Z mfail <mfail@desknix> # Create journeys table.
