@@ -40,11 +40,11 @@ let
 
         ${clean-journeys} --api ''${UPSTREAM} ${journeysCsv} | 
           ${pkgs.curl}/bin/curl \
-          "''${UPSTREAM}"/journeys \
-          --include \
-          --header 'Content-Type: text/csv' \
-          --verbose \
-          --data-binary  @-
+            "''${UPSTREAM}"/journeys \
+            --include \
+            --header 'Content-Type: text/csv' \
+            --verbose \
+            --data-binary  @-
       '';
   };
 in

@@ -13,8 +13,7 @@ def remove_journeys_less_than_10_seconds(df):
     return df
 
 
-def remove_journeys_with_non_int_distance(df):
-    col = 'distance_in_meters'
+def remove_all_but_integers(df, col):
     df[col] = pd.to_numeric(df[col], errors='coerce')
     df.dropna(inplace=True)
     df[col] = df[col].astype(int)
@@ -27,27 +26,30 @@ def remove_journeys_shorter_than_10_meters(df):
     return df
 
 
-def remove_journeys_with_invalid_stations(df, api):
-    url = api + "/stations?select=id"
+def replace_with_correct_id(df, api):
+    url = api + "/stations?select=id,id_in_avoindata"
     # Get ids of stations that can be used.
     response = requests.get(url)
+    ids_dict = {}
 
     if response.status_code == 200:
         data = response.json()
-        ids = map(lambda x: x.get('id'), data)
 
-        ids_set = set()
+        for row in data:
+            ids_dict[row.get('id_in_avoindata')] = row.get('id')
 
-        for id in ids:
-            ids_set.add(id)
     else:
         print('Failed GET request to: ', url,
               '\nStatus code: ', response.status_code)
         sys.exit(1)
     # Remove the journeys that can not be inserted due to
     # missing data about the stations.
-    df = df[df['departure_station_id'].isin(ids_set)]
-    df = df[df['return_station_id'].isin(ids_set)]
+    df = df[df['departure_station_id'].isin(set(ids_dict.keys()))]
+    df = df[df['return_station_id'].isin(set(ids_dict.keys()))]
+
+    # Translate the ids
+    df = df.replace({'departure_station_id': ids_dict})
+    df = df.replace({'return_station_id': ids_dict})
     return df
 
 
@@ -77,9 +79,11 @@ def main():
         "return_station_id", "distance_in_meters"
     ]
     df = (df
-          .pipe(remove_journeys_with_non_int_distance)
+          .pipe(remove_all_but_integers, col='distance_in_meters')
+          .pipe(remove_all_but_integers, col='departure_station_id')
+          .pipe(remove_all_but_integers, col='return_station_id')
           .pipe(remove_journeys_less_than_10_seconds)
-          .pipe(remove_journeys_with_invalid_stations, api=api)
+          .pipe(replace_with_correct_id, api=api)
           .pipe(remove_journeys_shorter_than_10_meters)
           )
 

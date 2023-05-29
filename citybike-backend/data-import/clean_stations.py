@@ -8,7 +8,7 @@ df = pd.read_csv(sys.argv[1], quotechar='"', usecols=[
     "x", "y"])
 
 df.columns = [
-    "id", "name_fi", "name_sv", "name_en", "address_fi",
+    "id_in_avoindata", "name_fi", "name_sv", "name_en", "address_fi",
     "address_sv", "city_fi", "city_sv", "operator", "capacity",
     "longitude", "latitude"
 ]
