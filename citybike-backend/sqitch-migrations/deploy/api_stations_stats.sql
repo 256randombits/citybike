@@ -34,18 +34,63 @@ CREATE VIEW api.stats_departures AS
 
   GROUP BY station_id;
 
+CREATE VIEW api.journeys_from_station_to_station_monthly AS
+  SELECT
 
--- CREATE VIEW api.stats_stations AS
--- SELECT
---   departures.id AS station_id,
---   departures_count,
---   returns_count,
---   average_departure_distance_in_meters,
---   average_return_distance_in_meters
--- FROM
---   api.journeys journeys
---   FULL OUTER JOIN api.stations departures ON journeys.departure_station_id = departures.id
---   FULL OUTER JOIN api.stations returns ON journeys.return_station_id = returns.id
---   WINDOW departures_window AS (PARTITION BY station_id
---     )
+    s_dep.id AS departure_station_id,
+
+    s_ret.id AS return_station_id,
+
+    COUNT(j.return_station_id) AS journeys_count,
+
+    date_trunc('month', j.departure_time) month_timestamp
+
+  FROM api.stations s_dep
+
+    FULL OUTER JOIN api.journeys j
+
+      ON j.departure_station_id = s_dep.id
+
+    FULL OUTER JOIN api.stations s_ret 
+
+      ON return_station_id = s_ret.id
+
+  GROUP BY s_dep.id, s_ret.id, month_timestamp;
+
+CREATE VIEW api.journeys_from_station_to_station AS
+  SELECT
+
+    departure_station_id,
+
+    return_station_id,
+
+    SUM(journeys_count) AS journeys_count
+
+  FROM api.journeys_from_station_to_station_monthly
+
+  GROUP BY departure_station_id, return_station_id;
+
+CREATE VIEW api.top5_destinations AS
+  SELECT DISTINCT * 
+  FROM 
+    (SELECT *
+     FROM
+      (SELECT
+
+        departure_station_id, 
+
+  		  nth_value(return_station_id, 1) OVER w rank1, 
+  		  nth_value(return_station_id, 2) OVER w rank2, 
+  		  nth_value(return_station_id, 3) OVER w rank3, 
+  		  nth_value(return_station_id, 4) OVER w rank4, 
+  		  nth_value(return_station_id, 5) OVER w rank5
+
+  	  FROM api.journeys_from_station_to_station
+  	  WINDOW w AS (PARTITION BY departure_station_id 
+  				            ORDER BY journeys_count DESC
+  				            RANGE BETWEEN UNBOUNDED PRECEDING AND
+  				            UNBOUNDED FOLLOWING)
+  	  ORDER BY journeys_count DESC) AS top5
+    ) AS idk
+  ORDER BY departure_station_id;
 COMMIT;
