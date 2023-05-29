@@ -55,7 +55,6 @@ BEGIN
     FORMAT('Station with id %I has DEPARTURES_COUNT %I when should be %I.', dep_id, departures_count, should_be);
 END$$;
 ROLLBACK;
-
 -- Test top5
 BEGIN;
 DO $$DECLARE
@@ -133,3 +132,64 @@ BEGIN
 END$$;
 
 ROLLBACK;
+
+-- Test top5 monthly
+BEGIN;
+DO $$DECLARE
+  station_id INTEGER;
+  rank1_this_month INTEGER;
+  rank1_the_other_month INTEGER;
+  actual_rank1_this_month INTEGER;
+  actual_rank1_the_other_month INTEGER;
+  this_month_journey_start TIMESTAMPTZ = '2021-10-10T22:40:00';
+  this_month_journey_end TIMESTAMPTZ = '2021-10-10T23:00:00';
+  the_other_month_journey_start TIMESTAMPTZ = '2021-11-10T22:40:00';
+  the_other_month_journey_end TIMESTAMPTZ = '2021-11-10T23:00:00';
+BEGIN
+    -- Arrange
+    station_id = test_utils.create_station_and_get_id();
+    rank1_this_month = test_utils.create_station_and_get_id();
+    rank1_the_other_month = test_utils.create_station_and_get_id();
+
+    -- Put less than other month's rank1
+    FOR counter in 1..2 LOOP
+      PERFORM test_utils.add_journey(station_id, 
+        rank1_this_month,this_month_journey_start,this_month_journey_end);
+    END loop;
+
+    -- Put more than this month's rank1
+    FOR counter in 1..5 LOOP
+      PERFORM test_utils.add_journey(station_id, 
+        rank1_the_other_month,the_other_month_journey_start,the_other_month_journey_end);
+    END loop;
+
+    -- Act
+    SELECT t5dm.rank1
+    INTO actual_rank1_this_month
+    FROM
+      api.top5_destinations_monthly t5dm
+    WHERE
+      t5dm.departure_station_id = station_id AND
+      month_timestamp = date_trunc('month',this_month_journey_start);
+
+    SELECT t5dm.rank1
+    INTO actual_rank1_the_other_month
+    FROM
+      api.top5_destinations_monthly t5dm
+    WHERE
+      t5dm.departure_station_id = station_id AND
+      month_timestamp = date_trunc('month',the_other_month_journey_start);
+
+    -- Assert
+
+    ASSERT rank1_this_month = actual_rank1_this_month,
+      FORMAT('Station with id %I has RANK1 %I when should be %I.'
+      , station_id, actual_rank1_this_month, actual_rank1_this_month);
+
+    ASSERT rank1_the_other_month = actual_rank1_the_other_month,
+      FORMAT('Station with id %I has RANK1 %I when should be %I.'
+      , station_id, actual_rank1_the_other_month, actual_rank1_the_other_month);
+
+END$$;
+ROLLBACK;
+
