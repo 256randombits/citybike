@@ -4,9 +4,6 @@ services:
     image: postgres:15.2
     command:
       -p "${POSTGRES_PORT}"
-      -c 'pgrst.api_schema=${PGRST_DB_SCHEMA}'
-      -c 'pgrst.anon_role=${PGRST_DB_ANON_ROLE}'
-      -c 'pgrst.auth_role=${PGRST_DB_AUTH_ROLE}'
     expose:
       - "${POSTGRES_PORT}"
     ports:
