@@ -6,4 +6,3 @@ stations 2023-05-28T18:48:53Z mfail <mfail@desknix> # Create stations table.
 journeys [stations] 2023-05-28T19:49:41Z mfail <mfail@desknix> # Create journeys table.
 api_stations [stations] 2023-05-28T19:58:48Z mfail <mfail@desknix> # Add a view for stations into api.
 api_journeys [journeys] 2023-05-28T20:47:39Z mfail <mfail@desknix> # Add a view for journeys into api.
-api_data_import [journeys] 2023-05-28T21:40:38Z mfail <mfail@desknix> # Add custom endpoint for importing data from foreign sources.
