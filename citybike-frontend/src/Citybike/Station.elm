@@ -1,4 +1,4 @@
-module Station exposing
+module Citybike.Station exposing
     ( AddressFi(..)
     , AddressSv(..)
     , Capacity(..)

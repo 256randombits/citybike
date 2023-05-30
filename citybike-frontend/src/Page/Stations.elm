@@ -8,7 +8,7 @@ import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import Json.Decode as Decode
 import Session exposing (Session)
-import Station exposing (Station, emptyQuery)
+import Citybike.Station as Station exposing (Station, emptyQuery)
 
 
 
@@ -102,7 +102,7 @@ update msg model =
 
 getStations : Cmd Msg
 getStations =
-    Api.get (Endpoint.stations emptyQuery) (Decode.list Station.decoder) GotStations
+    Api.get (Endpoint.stations Station.emptyQuery) (Decode.list Station.decoder) GotStations
 
 
 toSession : Model -> Session

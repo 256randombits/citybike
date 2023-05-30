@@ -1,8 +1,8 @@
 module Api.Endpoint exposing (Endpoint, journeys, request, stations, station)
 
 import Http
-import Journey exposing (JourneyQuery)
-import Station exposing (StationQuery, unwrapAddressFi, unwrapCapacity, unwrapCityFi, unwrapId, unwrapNameFi, unwrapOperator)
+import Citybike.Journey as Journey exposing (JourneyQuery)
+import Citybike.Station as Station exposing (StationQuery, unwrapAddressFi, unwrapCapacity, unwrapCityFi, unwrapId, unwrapNameFi, unwrapOperator)
 import Url.Builder as Builder exposing (QueryParameter)
 
 

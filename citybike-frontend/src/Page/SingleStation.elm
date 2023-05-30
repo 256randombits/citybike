@@ -5,7 +5,7 @@ import Api.Endpoint as Endpoint
 import Html exposing (..)
 import Http exposing (Error(..))
 import Session exposing (Session)
-import Station exposing (Station)
+import Citybike.Station as Station exposing (Station)
 
 
 

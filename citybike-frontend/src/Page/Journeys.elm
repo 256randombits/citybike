@@ -6,10 +6,10 @@ import GenericTable as Table
 import Html exposing (..)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
-import Journey exposing (Journey, emptyQuery)
+import Citybike.Journey as Journey exposing (Journey, emptyQuery)
 import Json.Decode as Decode
 import Session exposing (Session)
-import Station
+import Citybike.Station as Station
 
 
 

@@ -1,4 +1,4 @@
-module Journey exposing
+module Citybike.Journey exposing
     ( Journey
     , JourneyQuery
     , createJourney
@@ -15,7 +15,7 @@ module Journey exposing
 import Json.Decode as Decode exposing (Decoder, int, string)
 import Json.Decode.Pipeline exposing (required)
 import Json.Encode as Encode
-import Station exposing (Station)
+import Citybike.Station as Station exposing (Station)
 
 
 type Journey

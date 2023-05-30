@@ -1,16 +1,15 @@
 module Session exposing (Session, empty, getNavKey)
 
 import Browser.Navigation as Nav
-import Station exposing (Station)
 
 
 type Session
-    = Session { navKey : Nav.Key, stations : List Station }
+    = Session { navKey : Nav.Key }
 
 
 empty : Nav.Key -> Session
 empty navKey =
-    Session { navKey = navKey, stations = [] }
+    Session { navKey = navKey }
 
 
 getNavKey : Session -> Nav.Key
