@@ -72,13 +72,13 @@ type Station
         , citySv : String
         , operator : String
         , capacity : Int
-        , x : Float
-        , y : Float
+        , longitude : Float
+        , latitude : Float
         }
 
 
 createStation : Int -> String -> String -> String -> String -> String -> String -> String -> String -> Int -> Float -> Float -> Station
-createStation id nameFi nameSv nameEn addressFi addressSv cityFi citySv operator capacity x y =
+createStation id nameFi nameSv nameEn addressFi addressSv cityFi citySv operator capacity longitude latitude =
     Station
         { id = id
         , nameFi = nameFi
@@ -90,8 +90,8 @@ createStation id nameFi nameSv nameEn addressFi addressSv cityFi citySv operator
         , citySv = citySv
         , operator = operator
         , capacity = capacity
-        , x = x
-        , y = y
+        , longitude = longitude
+        , latitude = latitude
         }
 
 
@@ -108,8 +108,8 @@ decoder =
         |> required "city_sv" string
         |> required "operator" string
         |> required "capacity" int
-        |> required "x" float
-        |> required "y" float
+        |> required "longitude" float
+        |> required "latitude" float
 
 
 
@@ -175,12 +175,12 @@ getCapacity (Station values) =
 
 getX : Station -> Float
 getX (Station values) =
-    values.x
+    values.longitude
 
 
 getY : Station -> Float
 getY (Station values) =
-    values.y
+    values.latitude
 
 
 type alias StationQuery =
