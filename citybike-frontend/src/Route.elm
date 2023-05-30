@@ -11,7 +11,6 @@ type Route
     = Home
     | SingleStation Int
     | Stations
-    | QueryTool
 
 
 parser : Parser (Route -> a) a
@@ -20,7 +19,6 @@ parser =
         [ Parser.map Home Parser.top
         , Parser.map SingleStation (s "stations" </> int)
         , Parser.map Stations (s "stations")
-        , Parser.map QueryTool (s "query-tool")
         ]
 
 
@@ -59,6 +57,3 @@ routeToPieces page =
 
         Stations ->
             [ "stations" ]
-
-        QueryTool ->
-            [ "query-tool" ]

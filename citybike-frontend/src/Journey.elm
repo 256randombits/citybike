@@ -18,11 +18,6 @@ import Json.Encode as Encode
 import Station exposing (Station)
 
 
-type alias JourneyQuery =
-    { id : Maybe Int
-    }
-
-
 type Journey
     = Journey
         { id : Int
@@ -46,6 +41,13 @@ createJourney id departureTime returnTime departureStation returnStation distanc
         , distanceInMeters = distanceInMeters
         , durationInSeconds = durationInSeconds
         }
+
+type alias JourneyQuery =
+    { id : Maybe Int
+    , departureTime : Maybe String
+    , returnTime : Maybe String
+    }
+
 
 
 decoder : Decoder Journey

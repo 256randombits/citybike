@@ -7,7 +7,6 @@ import Page
 import Page.Blank as Blank
 import Page.Home as Home
 import Page.NotFound as NotFound
-import Page.QueryTool as QueryTool
 import Page.SingleStation as SingleStation
 import Page.Stations as Stations
 import Route exposing (..)
@@ -43,7 +42,6 @@ type Model
     | Home Home.Model
     | SingleStation SingleStation.Model
     | Stations Stations.Model
-    | QueryTool QueryTool.Model
 
 
 
@@ -72,10 +70,6 @@ changeRouteTo route model =
             Stations.init session
                 |> updateWith Stations GotStationsMsg
 
-        Just Route.QueryTool ->
-            QueryTool.init session
-                |> updateWith QueryTool GotQueryToolMsg
-
 
 type Msg
     = ChangedUrl Url
@@ -83,7 +77,6 @@ type Msg
     | GotHomeMsg Home.Msg
     | GotStationsMsg Stations.Msg
     | GotSingleStationMsg SingleStation.Msg
-    | GotQueryToolMsg QueryTool.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -135,14 +128,6 @@ update msg model =
                 _ ->
                     noChange
 
-        GotQueryToolMsg queryToolMsg ->
-            case model of
-                QueryTool queryTool ->
-                    QueryTool.update queryToolMsg queryTool
-                        |> updateWith QueryTool GotQueryToolMsg
-
-                _ ->
-                    noChange
 
 
 toSession : Model -> Session
@@ -162,9 +147,6 @@ toSession page =
 
         Stations stations ->
             Stations.toSession stations
-
-        QueryTool queryTool ->
-            QueryTool.toSession queryTool
 
 
 updateWith : (subModel -> Model) -> (subMsg -> Msg) -> ( subModel, Cmd subMsg ) -> ( Model, Cmd Msg )
@@ -206,5 +188,3 @@ view model =
         Stations station ->
             viewPage GotStationsMsg (Stations.view station)
 
-        QueryTool queryTool ->
-            viewPage GotQueryToolMsg (QueryTool.view queryTool)
