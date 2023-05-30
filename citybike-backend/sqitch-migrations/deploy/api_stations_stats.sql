@@ -78,7 +78,6 @@ CREATE VIEW api.top5_destinations_monthly AS
     				            ORDER BY journeys_count DESC
     				            RANGE BETWEEN UNBOUNDED PRECEDING AND
     				            UNBOUNDED FOLLOWING);
-COMMIT;
 
 CREATE VIEW api.top5_destinations AS
 
@@ -95,4 +94,49 @@ CREATE VIEW api.top5_destinations AS
     				            ORDER BY journeys_count DESC
     				            RANGE BETWEEN UNBOUNDED PRECEDING AND
     				            UNBOUNDED FOLLOWING);
+
+CREATE VIEW api.stats_station_monthly AS
+  SELECT 
+    sdm.station_id AS station_id,
+    sdm.departures_count AS departures_count,
+    sdm.average_distance_in_meters AS average_distance_in_meters,
+    sdm.month_timestamp AS month_timestamp
+  FROM api.stats_departures_monthly sdm;
+
+  CREATE FUNCTION api.stats_monthly(api.stations) RETURNS SETOF api.stats_station_monthly AS $function$
+    SELECT * FROM api.stats_station_monthly WHERE station_id = $1.id
+  $function$ STABLE LANGUAGE SQL;
+
+-- Computed relationship
+-- Allow top5 destinations in the monthly_stats
+CREATE FUNCTION api.top5_destinations(api.stats_station_monthly)
+  RETURNS SETOF api.top5_destinations_monthly ROWS 1 AS $$
+    SELECT departure_station_id, month_timestamp, rank1, rank2, rank3, rank4, rank5
+    FROM api.top5_destinations_monthly t5dm
+    WHERE t5dm.departure_station_id = $1.station_id
+    AND t5dm.month_timestamp = $1.month_timestamp
+$$ LANGUAGE SQL;
+
+DO $$
+DECLARE
+BEGIN
+
+-- Computed/Virtual columns to put stations into the response.
+FOR counter in 1..5 LOOP
+  EXECUTE FORMAT(
+    'CREATE FUNCTION api.rank%s_destination(api.top5_destinations_monthly) 
+      RETURNS SETOF api.stations ROWS 1 AS $function$
+        SELECT * FROM api.stations WHERE id = $1.rank%s
+      $function$ STABLE LANGUAGE SQL;
+    ', counter, counter);
+END loop;
+
+-- Permissions
+GRANT SELECT ON api.stats_station_monthly TO web_anon;
+GRANT SELECT ON api.top5_destinations_monthly TO web_anon;
+
+NOTIFY pgrst,
+'reload schema';
+
+END$$;
 COMMIT;
