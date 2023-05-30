@@ -6,6 +6,7 @@ import Html
 import Page
 import Page.Blank as Blank
 import Page.Home as Home
+import Page.Journeys as Journeys
 import Page.NotFound as NotFound
 import Page.SingleStation as SingleStation
 import Page.Stations as Stations
@@ -42,6 +43,7 @@ type Model
     | Home Home.Model
     | SingleStation SingleStation.Model
     | Stations Stations.Model
+    | Journeys Journeys.Model
 
 
 
@@ -69,6 +71,10 @@ changeRouteTo route model =
         Just Route.Stations ->
             Stations.init session
                 |> updateWith Stations GotStationsMsg
+                
+        Just Route.Journeys ->
+            Journeys.init session
+                |> updateWith Journeys GotJourneysMsg
 
 
 type Msg
@@ -76,6 +82,7 @@ type Msg
     | RequestedUrl Browser.UrlRequest
     | GotHomeMsg Home.Msg
     | GotStationsMsg Stations.Msg
+    | GotJourneysMsg Journeys.Msg
     | GotSingleStationMsg SingleStation.Msg
 
 
@@ -112,9 +119,18 @@ update msg model =
 
         GotStationsMsg stationMsg ->
             case model of
-                Stations station ->
-                    Stations.update stationMsg station
+                Stations stations ->
+                    Stations.update stationMsg stations
                         |> updateWith Stations GotStationsMsg
+
+                _ ->
+                    noChange
+
+        GotJourneysMsg journeyMsg ->
+            case model of
+                Journeys journeys ->
+                    Journeys.update journeyMsg journeys
+                        |> updateWith Journeys GotJourneysMsg
 
                 _ ->
                     noChange
@@ -127,7 +143,6 @@ update msg model =
 
                 _ ->
                     noChange
-
 
 
 toSession : Model -> Session
@@ -147,6 +162,9 @@ toSession page =
 
         Stations stations ->
             Stations.toSession stations
+
+        Journeys journeys ->
+            Journeys.toSession journeys
 
 
 updateWith : (subModel -> Model) -> (subMsg -> Msg) -> ( subModel, Cmd subMsg ) -> ( Model, Cmd Msg )
@@ -188,3 +206,5 @@ view model =
         Stations station ->
             viewPage GotStationsMsg (Stations.view station)
 
+        Journeys journeys ->
+            viewPage GotJourneysMsg (Journeys.view journeys)

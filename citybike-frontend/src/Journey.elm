@@ -9,7 +9,7 @@ module Journey exposing
     , getDistanceInMeters
     , getDurationInSeconds
     , getReturnStation
-    , getReturnTime
+    , getReturnTime, emptyQuery
     )
 
 import Json.Decode as Decode exposing (Decoder, int, string)
@@ -42,12 +42,20 @@ createJourney id departureTime returnTime departureStation returnStation distanc
         , durationInSeconds = durationInSeconds
         }
 
+
 type alias JourneyQuery =
     { id : Maybe Int
     , departureTime : Maybe String
     , returnTime : Maybe String
     }
 
+
+emptyQuery : { id : Maybe a, departureTime : Maybe b, returnTime : Maybe c }
+emptyQuery =
+    { id = Nothing
+    , departureTime = Nothing
+    , returnTime = Nothing
+    }
 
 
 decoder : Decoder Journey

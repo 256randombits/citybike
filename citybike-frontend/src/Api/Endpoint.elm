@@ -78,6 +78,9 @@ stations stationQuery =
     in
     internalStations queryParams
 
+journeys : JourneyQuery -> Endpoint
+journeys _ =
+    url [ "journeys?select=*,departure_station:stations!departure_station(*),return_station:stations!return_station(*)&limit=15&offset=0" ] []
 
 station : Int -> Endpoint
 station id =
@@ -92,9 +95,6 @@ station id =
 -- INTERNAL
 
 
-journeys : JourneyQuery -> Endpoint
-journeys _ =
-    url [ "journeys?select=*,departure_station:stations!departure_station(*),return_station:stations!return_station(*)" ] []
 
 
 internalStations : List QueryParameter -> Endpoint
