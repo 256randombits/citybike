@@ -66,8 +66,38 @@ viewResults results =
 viewJourneysInAList : List Journey -> Html Msg
 viewJourneysInAList journeysList =
     let
+        flip =
+            \f x y -> f y x
+
+        percision2 x =
+            x * 100 |> floor |> toFloat |> flip (/) 100
+
         metersToKm meters =
-            toFloat meters / 100
+            toFloat meters / 1000 |> percision2
+
+        secondsToMinutes seconds =
+            toFloat seconds / 60 |> percision2
+
+        toDistance journey =
+            journey |> Journey.getDistanceInMeters |> metersToKm |> String.fromFloat |> addTrail
+
+        toDuration journey =
+            journey |> Journey.getDurationInSeconds |> secondsToMinutes |> String.fromFloat |> addTrail
+
+        addTrail str =
+            case String.split "." str of
+                -- Two parts when there is one '.'
+                wholePart :: [ decimalPart ] ->
+                    -- Ensure there are at least two trailing digits.
+                    wholePart ++ "." ++ String.padRight 2 '0' decimalPart
+
+                -- There was no '.' in the string
+                [ wholePart ] ->
+                    wholePart ++ ".00"
+
+                -- Multiple '.'. Just return the string.
+                _ ->
+                    str
 
         headersWithDecoders =
             [ ( "Departure"
@@ -76,17 +106,16 @@ viewJourneysInAList journeysList =
             , ( "Return"
               , \x -> x |> Journey.getReturnStation |> Station.getNameFi
               )
-            , ( "Distance (km)"
-              , \x -> x |> Journey.getDistanceInMeters |> metersToKm |> String.fromFloat
-              )
-            , ( "Departure time"
-              , Journey.getDepartureTime
-              )
-            , ( "Return time"
-              , Journey.getReturnTime
-              )
+            , ( "Distance (km)", toDistance )
+
+            -- , ( "Departure time"
+            --   , Journey.getDepartureTime
+            --   )
+            -- , ( "Return time"
+            --   , \x -> x |> Journey.getReturnTime |> niceTime
+            --   )
             , ( "Duration (min)"
-              , \x -> x |> Journey.getDurationInSeconds |> String.fromInt
+              , toDuration
               )
             ]
     in
