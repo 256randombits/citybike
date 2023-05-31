@@ -73,6 +73,12 @@
                   nodePackages.tailwindcss
                 ];
             };
+            editReadme = pkgs.mkShell {
+              nativeBuildInputs = with pkgs;
+                [
+                  python311Packages.grip
+                ];
+            };
           };
         });
 }
