@@ -21,7 +21,7 @@
     };
   };
   outputs = { self, nixpkgs, flake-utils, stations-csv, journeys05-csv, journeys06-csv, journeys07-csv }:
-    flake-utils.lib.eachSystem [ "x86_64-linux" ]
+    flake-utils.lib.eachDefaultSystem
       (system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
