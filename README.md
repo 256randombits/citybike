@@ -64,7 +64,7 @@ docker-compose up
         </ol>
     </ol>
 </details>
-
+<hr>
 2. Import data
 ```bash
 # If there was data it would be removed.
