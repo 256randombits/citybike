@@ -10,24 +10,28 @@
     in
     {
       elm-live = flake-utils.lib.mkApp {
-        drv = pkgs.writeShellScriptBin "elm-live.sh" ''
-          PROJECTPATH=$(${pkgs.git}/bin/git rev-parse --show-toplevel)
+        drv = pkgs.writeShellApplication {
+          name = "elm-live.sh";
+          runtimeInputs = [ pkgs.elmPackages.elm ];
+          text = ''
+            PROJECTPATH=$(${pkgs.git}/bin/git rev-parse --show-toplevel)
 
-          # There seems to be no other way than starting elm-live in the same
-          # path as elm.json.
-          pushd ''${PROJECTPATH}/citybike-frontend
+            # There seems to be no other way than starting elm-live in the same
+            # path as elm.json.
+            pushd "''${PROJECTPATH}"/citybike-frontend
 
-          ${pkgs.elmPackages.elm-live}/bin/elm-live \
-            ''${PROJECTPATH}/citybike-frontend/src/Main.elm \
-            --pushstate \
-            --startpage=''${PROJECTPATH}/citybike-frontend/static/index.html \
-            --dir=''${PROJECTPATH}/citybike-frontend/static \
-            -- \
-              --output=''${PROJECTPATH}/citybike-frontend/static/_generated/elm.js \
+            ${pkgs.elmPackages.elm-live}/bin/elm-live \
+              "''${PROJECTPATH}"/citybike-frontend/src/Main.elm \
+              --pushstate \
+              --startpage="''${PROJECTPATH}"/citybike-frontend/static/index.html \
+              --dir="''${PROJECTPATH}"/citybike-frontend/static \
+              -- \
+                --output="''${PROJECTPATH}"/citybike-frontend/static/_generated/elm.js \
 
-          popd
+            popd
 
-        '';
+          '';
+        };
       };
       tailwindcss = flake-utils.lib.mkApp {
         drv = pkgs.writeShellScriptBin "tailwindcss.sh" ''
