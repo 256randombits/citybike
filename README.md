@@ -64,7 +64,9 @@ docker-compose up
         </ol>
     </ol>
 </details>
+
 <hr>
+
 2. Import data
 ```bash
 # If there was data it would be removed.
@@ -106,6 +108,24 @@ nix run .#destroy-and-initialize
     </ol>
 </details>
 
+<hr>
+
+3. You can now use Swagger UI (localhost:8080 if using the .env from .env.example) to view the endpoints.
+    * You can look at the [PostgREST operators](https://postgrest.org/en/stable/references/api/tables_views.html#operators) on how to use the API
+    * For example /journeys?id=50 needs to be /journeys?id=eq.50
+
+Here is an example usage where also [computed relationships](https://postgrest.org/en/stable/references/api/resource_embedding.html?highlight=computed%20relationships#computed-relationships) and [computed columns](https://postgrest.org/en/stable/references/api/tables_views.html?highlight=computed%20columns#computed-virtual-columns) are used:
+```bash
+curl \
+  'http://127.0.0.1:3001/stats_station?station_id=eq.50&select=*,top5_destinations(rank1_destination),top5_origins()' \
+  -H 'accept: application/json' \
+  -H 'Range-Unit: items' \
+-i
+```
+When run it returns something like this if the station exists (id might also be different):
+```json
+[{"station_id":50,"departures_count":5226,"average_departure_distance_in_meters":2020.7101279025583524,"returns_count":5264,"average_return_distance_in_meters":1939.9641881022832400,"top5_destinations":{"rank1_destination":{"id":27,"name_fi":"Länsituuli","name_sv":"Västanvinden","name_en":"Länsituuli","address_fi":"Länsituulenkuja 3","address_sv":"Västanvindsgränden 3","city_fi":"Espoo","city_sv":"Esbo","operator":"CityBike Finland","capacity":24,"longitude":24.802049,"latitude":60.175358,"id_in_avoindata":517}}}]%   
+```
 ### Setting up frontend
 1. Start elm dev-server
 ```bash
