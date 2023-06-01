@@ -49,11 +49,14 @@ cp .env.example .env
 docker-compose up
 ```
 <details>
-    <summary>More details</summary>
+    <summary>What does this do?</summary>
     <ol>
-    <li>Start PostgreSQL</li>
-    <li>Run <a href="citybike-backend/pginit/create-postgrest-auth-user.sh">create-postgrest-auth-user.sh</a>, because it's mounted inside of <b>/docker-entrypoint-initdb.d</b>.</li>
-    <li>Start PostgREST server (we'll cover what it does in more details once we've run migrations.)</li>
+    <li>Starts PostgreSQL
+        <ul>
+        <li>Runs <a href="citybike-backend/pginit/create-postgrest-auth-user.sh">create-postgrest-auth-user.sh</a>, because it's mounted inside of <b>/docker-entrypoint-initdb.d</b>.</li>
+        </ul>
+    </li>
+    <li>Starts PostgREST (which does not really do anything at this point.)</li>
     <li>Because of docker-compose.override.yml:</li>
         <ol>
         <li>Start SwaggerUI that points to the OpenAPI spec provided by PostgREST.</li>
@@ -68,7 +71,7 @@ docker-compose up
 nix run .#destroy-and-initialize
 ```
 <details>
-    <summary>More details</summary>
+    <summary>What does this do?</summary>
     <ol>
     <li>Runs the <b>outputs.destroy-and-initialize.system</b> target inside of flake.nix
         </ul>
@@ -133,10 +136,11 @@ nix run .#tailwindcss
 
 #### Additional
 
-- [] Pagination
-- [] Ordering per column
-- [] Searching
-- [] Filtering
+Endpoints for getting these exist.
+- [~] Pagination
+- [~] Ordering per column
+- [~] Searching
+- [~] Filtering
 
 ### Station list
 #### Recommended
@@ -157,7 +161,6 @@ nix run .#tailwindcss
 - [?] Station address
 - [?] Total number of journeys starting from the station
 - [?] Total number of journeys ending at the station
-
 #### Additional
 
 Endpoints for getting these exist. (Map does not exist)
@@ -167,3 +170,11 @@ Endpoints for getting these exist. (Map does not exist)
 - [~] Top 5 most popular return stations for journeys starting from the station
 - [~] Top 5 most popular departure stations for journeys ending at the station
 - [~] Ability to filter all the calculations per month
+
+### Surprise us with
+
+- [x] Endpoints to store new journeys data or new bicycle stations
+- [x] Running backend in Docker
+- [] Running backend in Cloud
+- [] Implement E2E tests
+- [] Create UI for adding journeys or bicycle stations
