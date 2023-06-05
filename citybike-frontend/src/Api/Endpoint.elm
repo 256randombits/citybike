@@ -1,8 +1,24 @@
-module Api.Endpoint exposing (Endpoint, journeys, request, stations, station)
+module Api.Endpoint exposing
+    ( Endpoint
+    , journeys
+    , request
+    , station
+    , stationStats
+    , stations
+    )
 
-import Http
 import Citybike.Journey as Journey exposing (JourneyQuery)
-import Citybike.Station as Station exposing (StationQuery, unwrapAddressFi, unwrapCapacity, unwrapCityFi, unwrapId, unwrapNameFi, unwrapOperator)
+import Citybike.Station as Station
+    exposing
+        ( StationQuery
+        , unwrapAddressFi
+        , unwrapCapacity
+        , unwrapCityFi
+        , unwrapId
+        , unwrapNameFi
+        , unwrapOperator
+        )
+import Http
 import Url.Builder as Builder exposing (QueryParameter)
 
 
@@ -78,9 +94,11 @@ stations stationQuery =
     in
     internalStations queryParams
 
+
 journeys : JourneyQuery -> Endpoint
 journeys _ =
     url [ "journeys?select=*,departure_station:stations!departure_station(*),return_station:stations!return_station(*)&limit=15&offset=0" ] []
+
 
 station : Int -> Endpoint
 station id =
@@ -91,10 +109,19 @@ station id =
     internalStations queryParams
 
 
+stationStats : Int -> Endpoint
+stationStats id =
+    let
+        queryParams =
+            [ Builder.string "id" ("eq." ++ String.fromInt id)
+            , Builder.string "select" "*,stats(*,top5_destinations(rank1_destination,rank2_destination,rank3_destination,rank4_destination,rank5_destination),top5_origins(rank1_origin,rank2_origin,rank3_origin,rank4_origin,rank5_origin))"
+            ]
+    in
+    internalStations queryParams
+
+
 
 -- INTERNAL
-
-
 
 
 internalStations : List QueryParameter -> Endpoint
