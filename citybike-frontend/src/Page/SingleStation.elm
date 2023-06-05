@@ -1,11 +1,23 @@
-module Page.SingleStation exposing (Model, Msg, init, toSession, update, view)
+module Page.SingleStation exposing
+    ( Model
+    , Msg
+    , init
+    , toSession
+    , update
+    , view
+    )
 
+import GenericTable as Table
 import Api
 import Api.Endpoint as Endpoint
+import Citybike.Station as Station exposing (Station)
+import Citybike.StationStats.StatsAllTime as StatsAllTime exposing (StatsAllTime)
+import Citybike.StationStats.Stats as Stats exposing (Stats)
 import Html exposing (..)
 import Http exposing (Error(..))
+import Json.Decode as Decode
 import Session exposing (Session)
-import Citybike.Station as Station exposing (Station)
+import Tuple exposing (pair)
 
 
 
@@ -23,7 +35,7 @@ init session id =
 
 type State
     = Loading
-    | HasStation Station
+    | HasStation ( Station, StatsAllTime )
     | Error Api.Error
 
 
@@ -40,18 +52,46 @@ view model =
                 Loading ->
                     text "Loading..."
 
-                HasStation station ->
+                HasStation ( station, statsAllTime ) ->
                     let
                         name =
                             Station.getNameFi station
+
+                        stats =
+                            StatsAllTime.getStats statsAllTime
+                        departures = Stats.getDeparturesCount stats
                     in
-                    text name
+                    div []
+                        [ text <| String.fromInt departures
+                        , viewStatsInATable stats
+                        ]
 
                 Error err ->
                     text <| Api.showError err
             ]
     }
 
+viewStatsInATable : Stats -> Html Msg
+viewStatsInATable stats =
+    let
+        headersWithDecoders =
+            [ ( "Dperatures", \x -> x |> Stats.getDeparturesCount |> String.fromInt )
+            , ( "Return", \x -> x |> Stats.getReturnsCount |> String.fromInt )
+            , ( "Avg dep dist", \x -> x |> Stats.getAverageDepartureDistanceInMeters |> floor |> String.fromInt )
+            , ( "Avg ret dist", \x -> x |> Stats.getAverageReturnDistanceInMeters |> floor |> String.fromInt )
+            , ( "Rank1_d", \x -> x |> Stats.getRank1Destination |> Maybe.map Station.getNameFi |> Maybe.withDefault "No station" )
+            , ( "Rank2_d", \x -> x |> Stats.getRank2Destination |> Maybe.map Station.getNameFi |> Maybe.withDefault "No station" )
+            , ( "Rank3_d", \x -> x |> Stats.getRank3Destination |> Maybe.map Station.getNameFi |> Maybe.withDefault "No station" )
+            , ( "Rank4_d", \x -> x |> Stats.getRank4Destination |> Maybe.map Station.getNameFi |> Maybe.withDefault "No station" )
+            , ( "Rank5_d", \x -> x |> Stats.getRank5Destination |> Maybe.map Station.getNameFi |> Maybe.withDefault "No station" )
+            , ( "Rank1_o", \x -> x |> Stats.getRank1Origin |> Maybe.map Station.getNameFi |> Maybe.withDefault "No station" )
+            , ( "Rank2_o", \x -> x |> Stats.getRank2Origin |> Maybe.map Station.getNameFi |> Maybe.withDefault "No station" )
+            , ( "Rank3_o", \x -> x |> Stats.getRank3Origin |> Maybe.map Station.getNameFi |> Maybe.withDefault "No station" )
+            , ( "Rank4_o", \x -> x |> Stats.getRank4Origin |> Maybe.map Station.getNameFi |> Maybe.withDefault "No station" )
+            , ( "Rank5_o", \x -> x |> Stats.getRank5Origin |> Maybe.map Station.getNameFi |> Maybe.withDefault "No station" )
+            ]
+    in
+    Table.view headersWithDecoders [stats]
 
 
 -- UPDATE
@@ -59,11 +99,15 @@ view model =
 
 getStation : Int -> Cmd Msg
 getStation id =
-    Api.getSingular (Endpoint.station id) Station.decoder GotStation
+    let
+        stationWithStatsDecoder =
+            Decode.map2 pair Station.decoder (Decode.field "stats" StatsAllTime.decoder)
+    in
+    Api.getSingular (Endpoint.stationStats id) stationWithStatsDecoder GotStation
 
 
 type Msg
-    = GotStation (Result Api.Error Station)
+    = GotStation (Result Api.Error ( Station, StatsAllTime ))
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )

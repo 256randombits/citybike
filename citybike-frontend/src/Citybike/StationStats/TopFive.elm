@@ -54,21 +54,21 @@ createTopFive con mr1 mr2 mr3 mr4 mr5 =
 destinationsDecoder : Decoder Destinations
 destinationsDecoder =
     Decode.succeed (createTopFive Destinations)
-        |> optional "rank1" (Decode.maybe Station.decoder) Nothing
-        |> optional "rank2" (Decode.maybe Station.decoder) Nothing
-        |> optional "rank3" (Decode.maybe Station.decoder) Nothing
-        |> optional "rank4" (Decode.maybe Station.decoder) Nothing
-        |> optional "rank5" (Decode.maybe Station.decoder) Nothing
+        |> optional "rank1_destination" (Decode.maybe Station.decoder) Nothing
+        |> optional "rank2_destination" (Decode.maybe Station.decoder) Nothing
+        |> optional "rank3_destination" (Decode.maybe Station.decoder) Nothing
+        |> optional "rank4_destination" (Decode.maybe Station.decoder) Nothing
+        |> optional "rank5_destination" (Decode.maybe Station.decoder) Nothing
 
 
 originsDecoder : Decoder Origins
 originsDecoder =
     Decode.succeed (createTopFive Origins)
-        |> optional "rank1" (Decode.maybe Station.decoder) Nothing
-        |> optional "rank2" (Decode.maybe Station.decoder) Nothing
-        |> optional "rank3" (Decode.maybe Station.decoder) Nothing
-        |> optional "rank4" (Decode.maybe Station.decoder) Nothing
-        |> optional "rank5" (Decode.maybe Station.decoder) Nothing
+        |> optional "rank1_origin" (Decode.maybe Station.decoder) Nothing
+        |> optional "rank2_origin" (Decode.maybe Station.decoder) Nothing
+        |> optional "rank3_origin" (Decode.maybe Station.decoder) Nothing
+        |> optional "rank4_origin" (Decode.maybe Station.decoder) Nothing
+        |> optional "rank5_origin" (Decode.maybe Station.decoder) Nothing
 
 
 getRank1Destination : Destinations -> Maybe Station

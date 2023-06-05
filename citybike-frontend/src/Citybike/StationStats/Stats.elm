@@ -39,8 +39,8 @@ decoder : Decoder Stats
 decoder =
     Decode.map3 createStats
         Basic.decoder
-        TopFive.destinationsDecoder
-        TopFive.originsDecoder
+        (Decode.field "top5_destinations" TopFive.destinationsDecoder)
+        (Decode.field "top5_origins" TopFive.originsDecoder)
 
 
 
