@@ -220,7 +220,7 @@ CREATE VIEW api.stats_station AS
     sr.average_distance_in_meters AS average_return_distance_in_meters
   FROM api.stats_departures sd INNER JOIN api.stats_returns sr ON sd.station_id = sr.station_id;
 
-CREATE FUNCTION api.stats(api.stations) RETURNS SETOF api.stats_station AS $function$
+CREATE FUNCTION api.stats(api.stations) RETURNS SETOF api.stats_station ROWS 1 AS $function$
   SELECT * FROM api.stats_station WHERE station_id = $1.id
 $function$ STABLE LANGUAGE SQL;
 
