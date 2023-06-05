@@ -7,12 +7,13 @@ module Page.SingleStation exposing
     , view
     )
 
-import GenericTable as Table
 import Api
 import Api.Endpoint as Endpoint
 import Citybike.Station as Station exposing (Station)
-import Citybike.StationStats.StatsAllTime as StatsAllTime exposing (StatsAllTime)
 import Citybike.StationStats.Stats as Stats exposing (Stats)
+import Citybike.StationStats.StatsAllTime as StatsAllTime exposing (StatsAllTime)
+import Citybike.StationStats.StatsOnMonth as StatsOnMonth exposing (StatsOnMonth)
+import GenericTable as Table
 import Html exposing (..)
 import Http exposing (Error(..))
 import Json.Decode as Decode
@@ -28,6 +29,10 @@ type alias Model =
     { session : Session, id : Int, state : State }
 
 
+type alias StationWithStats =
+    { station : Station, statsAllTime : StatsAllTime, statsOnMonthList : List StatsOnMonth }
+
+
 init : Session -> Int -> ( Model, Cmd Msg )
 init session id =
     ( { session = session, id = id, state = Loading }, getStation id )
@@ -35,7 +40,7 @@ init session id =
 
 type State
     = Loading
-    | HasStation ( Station, StatsAllTime )
+    | HasStation StationWithStats
     | Error Api.Error
 
 
@@ -52,24 +57,57 @@ view model =
                 Loading ->
                     text "Loading..."
 
-                HasStation ( station, statsAllTime ) ->
+                HasStation { station, statsAllTime, statsOnMonthList } ->
                     let
                         name =
                             Station.getNameFi station
 
+                        address =
+                            Station.getAddressFi station
+
                         stats =
                             StatsAllTime.getStats statsAllTime
-                        departures = Stats.getDeparturesCount stats
                     in
                     div []
-                        [ text <| String.fromInt departures
-                        , viewStatsInATable stats
+                        [ text <| name ++ " " ++ address
+                        , div []
+                          [ p [] [text "ALL TIME STATS"]
+                          , viewStatsInATable stats
+                          ]
+                        , div []
+                          [ p [] [text "MONTHLY STATS"]
+                          , viewMonthlyStatsInATable statsOnMonthList
+                          ]
                         ]
 
                 Error err ->
                     text <| Api.showError err
             ]
     }
+
+
+viewMonthlyStatsInATable : List StatsOnMonth -> Html Msg
+viewMonthlyStatsInATable statsOnMonthList =
+    let
+        headersWithDecoders =
+            [ ( "Month", \x -> StatsOnMonth.getMonth x )
+            , ( "Dperatures", \x -> StatsOnMonth.getStats x |> Stats.getDeparturesCount |> String.fromInt )
+            , ( "Return", \x -> StatsOnMonth.getStats x |> Stats.getReturnsCount |> String.fromInt )
+            , ( "Avg dep dist", \x -> StatsOnMonth.getStats x |> Stats.getAverageDepartureDistanceInMeters |> floor |> String.fromInt )
+            , ( "Avg ret dist", \x -> StatsOnMonth.getStats x |> Stats.getAverageReturnDistanceInMeters |> floor |> String.fromInt )
+            , ( "Rank1_d", \x -> StatsOnMonth.getStats x |> Stats.getRank1Destination |> Maybe.map Station.getNameFi |> Maybe.withDefault "No station" )
+            , ( "Rank2_d", \x -> StatsOnMonth.getStats x |> Stats.getRank2Destination |> Maybe.map Station.getNameFi |> Maybe.withDefault "No station" )
+            , ( "Rank3_d", \x -> StatsOnMonth.getStats x |> Stats.getRank3Destination |> Maybe.map Station.getNameFi |> Maybe.withDefault "No station" )
+            , ( "Rank4_d", \x -> StatsOnMonth.getStats x |> Stats.getRank4Destination |> Maybe.map Station.getNameFi |> Maybe.withDefault "No station" )
+            , ( "Rank5_d", \x -> StatsOnMonth.getStats x |> Stats.getRank5Destination |> Maybe.map Station.getNameFi |> Maybe.withDefault "No station" )
+            , ( "Rank1_o", \x -> StatsOnMonth.getStats x |> Stats.getRank1Origin |> Maybe.map Station.getNameFi |> Maybe.withDefault "No station" )
+            , ( "Rank2_o", \x -> StatsOnMonth.getStats x |> Stats.getRank2Origin |> Maybe.map Station.getNameFi |> Maybe.withDefault "No station" )
+            , ( "Rank3_o", \x -> StatsOnMonth.getStats x |> Stats.getRank3Origin |> Maybe.map Station.getNameFi |> Maybe.withDefault "No station" )
+            , ( "Rank4_o", \x -> StatsOnMonth.getStats x |> Stats.getRank4Origin |> Maybe.map Station.getNameFi |> Maybe.withDefault "No station" )
+            , ( "Rank5_o", \x -> StatsOnMonth.getStats x |> Stats.getRank5Origin |> Maybe.map Station.getNameFi |> Maybe.withDefault "No station" )
+            ]
+    in
+    Table.view headersWithDecoders statsOnMonthList
 
 viewStatsInATable : Stats -> Html Msg
 viewStatsInATable stats =
@@ -91,7 +129,8 @@ viewStatsInATable stats =
             , ( "Rank5_o", \x -> x |> Stats.getRank5Origin |> Maybe.map Station.getNameFi |> Maybe.withDefault "No station" )
             ]
     in
-    Table.view headersWithDecoders [stats]
+    Table.view headersWithDecoders [ stats ]
+
 
 
 -- UPDATE
@@ -100,14 +139,18 @@ viewStatsInATable stats =
 getStation : Int -> Cmd Msg
 getStation id =
     let
+        yay : Station -> StatsAllTime -> List StatsOnMonth -> StationWithStats
+        yay st at mt =
+            { station = st, statsAllTime = at, statsOnMonthList = mt }
+
         stationWithStatsDecoder =
-            Decode.map2 pair Station.decoder (Decode.field "stats" StatsAllTime.decoder)
+            Decode.map3 yay Station.decoder (Decode.field "stats" StatsAllTime.decoder) (Decode.field "stats_monthly" <| Decode.list StatsOnMonth.decoder)
     in
     Api.getSingular (Endpoint.stationStats id) stationWithStatsDecoder GotStation
 
 
 type Msg
-    = GotStation (Result Api.Error ( Station, StatsAllTime ))
+    = GotStation (Result Api.Error StationWithStats)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )

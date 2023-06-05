@@ -114,7 +114,7 @@ stationStats id =
     let
         queryParams =
             [ Builder.string "id" ("eq." ++ String.fromInt id)
-            , Builder.string "select" "*,stats(*,top5_destinations(rank1_destination,rank2_destination,rank3_destination,rank4_destination,rank5_destination),top5_origins(rank1_origin,rank2_origin,rank3_origin,rank4_origin,rank5_origin))"
+            , Builder.string "select" "*,stats(*,top5_destinations(rank1_destination,rank2_destination,rank3_destination,rank4_destination,rank5_destination),top5_origins(rank1_origin,rank2_origin,rank3_origin,rank4_origin,rank5_origin)),stats_monthly(*,top5_destinations(rank1_destination,rank2_destination,rank3_destination,rank4_destination,rank5_destination),top5_origins(rank1_origin,rank2_origin,rank3_origin,rank4_origin,rank5_origin))"
             ]
     in
     internalStations queryParams
