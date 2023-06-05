@@ -1,4 +1,4 @@
-module Citybike.StationStats.StatsAllTime exposing (StatsAllTime, decode, getStats)
+module Citybike.StationStats.StatsAllTime exposing (StatsAllTime, decoder, getStats)
 
 import Citybike.StationStats.Stats as Stats exposing (Stats)
 import Citybike.StationStats.TopFive exposing (..)
@@ -9,8 +9,8 @@ type StatsAllTime
     = StatsAllTime Stats
 
 
-decode : Decoder StatsAllTime
-decode =
+decoder : Decoder StatsAllTime
+decoder =
     Decode.map StatsAllTime
         Stats.decoder
 
